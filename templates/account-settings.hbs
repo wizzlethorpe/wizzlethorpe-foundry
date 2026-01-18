@@ -1,0 +1,110 @@
+<form class="quickbrush-account-settings-form" autocomplete="off">
+  <div class="account-header">
+    <img src="modules/quickbrush/images/wizzlethorpe-logo.png" alt="Wizzlethorpe Labs" class="account-logo" />
+    <h2>Wizzlethorpe Labs Account</h2>
+  </div>
+
+  {{#if isLinked}}
+  <div class="account-status linked">
+    <div class="account-info">
+      {{#if account.imageUrl}}
+      <img src="{{account.imageUrl}}" alt="{{account.name}}" class="account-avatar" />
+      {{else}}
+      <div class="account-avatar-placeholder">
+        <i class="fas fa-user"></i>
+      </div>
+      {{/if}}
+      <div class="account-details">
+        <div class="account-name">{{account.name}}</div>
+        <div class="account-email">{{account.email}}</div>
+        <div class="account-tier {{tierBadgeClass}}">{{account.tierName}}</div>
+      </div>
+    </div>
+
+    <div class="account-features">
+      <h3>Your Features</h3>
+      <ul>
+        <li class="feature-available">
+          <i class="fas fa-check"></i> Character generation (BYOK)
+        </li>
+        {{#if canUseBYOKAdvanced}}
+        <li class="feature-available">
+          <i class="fas fa-check"></i> Creature, Scene, Item generation (BYOK)
+        </li>
+        {{else}}
+        <li class="feature-unavailable">
+          <i class="fas fa-times"></i> Creature, Scene, Item generation (Requires Apprentice)
+        </li>
+        {{/if}}
+        {{#if canUseServerGeneration}}
+        <li class="feature-available">
+          <i class="fas fa-check"></i> Server-side generation (no API key needed)
+        </li>
+        {{else}}
+        <li class="feature-unavailable">
+          <i class="fas fa-times"></i> Server-side generation (Requires Alchemist)
+        </li>
+        {{/if}}
+      </ul>
+    </div>
+
+    <div class="account-actions">
+      <button type="button" class="unlink-account-btn">
+        <i class="fas fa-unlink"></i> Unlink Account
+      </button>
+    </div>
+  </div>
+  {{else}}
+  <div class="account-status not-linked">
+    <div class="not-linked-message">
+      <i class="fas fa-user-slash"></i>
+      <p>No Wizzlethorpe Labs account linked.</p>
+      <p class="hint">Link your account to access premium features based on your Patreon subscription.</p>
+    </div>
+
+    <div class="tier-info">
+      <h3>Subscription Tiers</h3>
+      <div class="tier-list">
+        <div class="tier-item tier-free">
+          <div class="tier-name">Free</div>
+          <div class="tier-price">$0/month</div>
+          <div class="tier-features">Character generation with your own API key</div>
+        </div>
+        <div class="tier-item tier-apprentice">
+          <div class="tier-name">Apprentice</div>
+          <div class="tier-price">$3/month</div>
+          <div class="tier-features">All generation types with your own API key</div>
+        </div>
+        <div class="tier-item tier-alchemist">
+          <div class="tier-name">Alchemist</div>
+          <div class="tier-price">$5/month</div>
+          <div class="tier-features">10 images/week using our API (no key needed)</div>
+        </div>
+        <div class="tier-item tier-archmage">
+          <div class="tier-name">Archmage</div>
+          <div class="tier-price">$10/month</div>
+          <div class="tier-features">25 images/week using our API (no key needed)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="account-actions">
+      <button type="button" class="link-account-btn">
+        <i class="fab fa-patreon"></i> Link with Patreon
+      </button>
+    </div>
+  </div>
+  {{/if}}
+
+  <div class="account-footer">
+    <p>
+      <a href="https://www.patreon.com/wizzlethorpe" target="_blank">
+        <i class="fab fa-patreon"></i> Subscribe on Patreon
+      </a>
+      |
+      <a href="https://quickbrush.wizzlethorpe.com" target="_blank">
+        <i class="fas fa-external-link-alt"></i> Web App
+      </a>
+    </p>
+  </div>
+</form>
