@@ -2,7 +2,7 @@
   "id": "wizzlethorpe-labs",
   "title": "Wizzlethorpe Labs Tools",
   "description": "Tools from Wizzlethorpe Labs: image generation for characters, creatures, items, and scenes, plus magical cocktails with unpredictable effects.",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "compatibility": {
     "minimum": "13.0",
     "verified": "13.0"
