@@ -1,41 +1,44 @@
-# Quickbrush for Foundry VTT
+# Wizzlethorpe Labs for Foundry VTT
 
-AI-powered image generation for Foundry Virtual Tabletop. Bring Your Own Key (BYOK).
-
-**A tool by Wizzlethorpe Labs.**
+Tools for tabletop roleplayers, game masters, and worldbuilders.
 
 ## Features
 
-- **Generate images** for actors (characters, NPCs, creatures) and items
-- **Bring Your Own Key**: Uses your OpenAI API key—you control costs and privacy
-- **Reference images**: Upload up to 3 reference images for style/character consistency
-- **Quality options**: Low, Medium, High
-- **Aspect ratios**: Square, Landscape, Portrait
+### Quickbrush - AI Image Generation
+Generate fantasy artwork for characters, creatures, items, and scenes directly in Foundry VTT.
+
+- **Bring Your Own Key**: Use your OpenAI API key—you control costs and privacy
+- **Reference images**: Upload up to 4 reference images for style/character consistency
+- **Multiple types**: Characters, creatures, items, and scenes
+- **Quality options**: Fast (gpt-image-1-mini) or High Quality (gpt-image-1)
 - **Seamless integration**: Right-click menu on actors/items to generate images
+
+### Bixby's Cocktails
+Mix magical cocktails with unpredictable effects for your TTRPG sessions.
 
 ## Installation
 
 In Foundry VTT, go to **Add-on Modules → Install Module** and paste:
 
 ```
-https://github.com/wizzlethorpe/quickbrush/releases/latest/download/module.json
+https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/latest/download/module.json
 ```
 
-Or install manually from the [GitHub releases page](https://github.com/wizzlethorpe/quickbrush/releases).
+Or install manually from the [GitHub releases page](https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases).
 
 ## Setup
 
 1. Get your OpenAI API key from [platform.openai.com](https://platform.openai.com)
-2. Open **Module Settings → Quickbrush**
+2. Open **Module Settings → Wizzlethorpe Labs**
 3. Enter your OpenAI API key
-4. (Optional) Choose your preferred image model (gpt-image-1-mini recommended for speed)
+4. (Optional) Choose your preferred image model
 
 ## Usage
 
 ### Generate Actor Images
 
 1. Right-click on any Actor (character/NPC/creature)
-2. Select **Generate Image**
+2. Select **Generate Character Image** or **Generate Creature Image**
 3. The description will auto-populate from the actor's bio/notes
 4. Optionally add a context prompt or reference images
 5. Click **Generate**
@@ -48,15 +51,19 @@ Or install manually from the [GitHub releases page](https://github.com/wizzletho
 3. Description auto-populates from item description
 4. Adjust quality and aspect ratio as needed
 5. Click **Generate**
-6. Image is set as the item's icon automatically
 
-## Settings
+## Subscription Tiers
 
-- **OpenAI API Key**: Your API key from platform.openai.com
-- **Image Model**: gpt-image-1-mini (faster/cheaper) or gpt-image-1 (higher quality)
-- **Save Folder**: Folder name in Foundry's data directory for generated images
+Some features require a Patreon subscription. Link your account at [wizzlethorpe.com](https://wizzlethorpe.com).
 
-## Pricing
+| Feature | Free | Apprentice ($3) | Alchemist ($5) | Archmage ($10) |
+|---------|------|-----------------|----------------|----------------|
+| Character generation (BYOK) | ✓ | ✓ | ✓ | ✓ |
+| Scene/Creature/Item gen (BYOK) | — | ✓ | ✓ | ✓ |
+| Server-side generation | — | — | ✓ | ✓ |
+| Weekly server quota | — | — | 10 | 25 |
+
+## Pricing (BYOK Mode)
 
 Uses your OpenAI API key—you only pay for what you use:
 
@@ -67,9 +74,10 @@ Check [OpenAI's pricing page](https://openai.com/pricing) for current rates.
 
 ## Support
 
-- GitHub: [wizzlethorpe/quickbrush](https://github.com/wizzlethorpe/quickbrush)
-- Report issues: [GitHub Issues](https://github.com/wizzlethorpe/quickbrush/issues)
-- Website: [quickbrush.wizzlethorpe.com](https://quickbrush.wizzlethorpe.com)
+- Website: [wizzlethorpe.com](https://wizzlethorpe.com)
+- GitHub: [wizzlethorpe/wizzlethorpe-foundry](https://github.com/wizzlethorpe/wizzlethorpe-foundry)
+- Issues: [GitHub Issues](https://github.com/wizzlethorpe/wizzlethorpe-foundry/issues)
+- Email: bixby@wizzlethorpe.com
 
 ## License
 
