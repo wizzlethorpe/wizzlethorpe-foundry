@@ -1,8 +1,6 @@
 {
-  "QUICKBRUSH": {
-    "Title": "Quickbrush Image Generator",
-    "ButtonLabel": "Generate Image",
-    "JournalButton": "Create with Quickbrush",
+  "WIZZLETHORPE": {
+    "Title": "Wizzlethorpe Labs Tools",
     "Settings": {
       "AccountSettings": {
         "Name": "Wizzlethorpe Labs Account",
@@ -12,11 +10,14 @@
       "UseServerMode": {
         "Name": "Use Server-Side Generation",
         "Hint": "When enabled, use Wizzlethorpe Labs servers for generation (requires Alchemist+ subscription). When disabled, always use your own API key."
-      },
-      "CoreLibraryUrl": {
-        "Name": "Core Library URL",
-        "Hint": "URL to load the quickbrush-core.js library from. Change this to use a custom or updated version. Default: https://quickbrush.ai/js/quickbrush-core.js"
-      },
+      }
+    }
+  },
+  "QUICKBRUSH": {
+    "Title": "Quickbrush Image Generator",
+    "ButtonLabel": "Quickbrush",
+    "JournalButton": "Create with Quickbrush",
+    "Settings": {
       "OpenAIApiKey": {
         "Name": "OpenAI API Key",
         "Hint": "Your OpenAI API key for BYOK mode. Get one at https://platform.openai.com/api-keys. Not required if using server-side generation."
@@ -64,7 +65,7 @@
       "Cancel": "Cancel"
     },
     "Notifications": {
-      "NoApiKey": "Please set your OpenAI API key in module settings",
+      "NoApiKey": "Please set your OpenAI API key in module settings or link your Wizzlethorpe Labs account",
       "Generating": "Generating image with Quickbrush. We'll notify you when it's ready!",
       "Success": "Image generated successfully!",
       "Error": "Failed to generate image: {error}",
@@ -75,6 +76,35 @@
       "Title": "Quickbrush Gallery",
       "Description": "This journal contains all images generated with Quickbrush.",
       "EntryTemplate": "<h2>{type} - {date}</h2><p><strong>Description:</strong> {description}</p><p><strong>Quality:</strong> {quality} | <strong>Aspect Ratio:</strong> {aspectRatio}</p><img src=\"{imageUrl}\" alt=\"{description}\" style=\"max-width: 100%; height: auto;\" /><hr>"
+    }
+  },
+  "COCKTAILS": {
+    "Title": "Bixby's Cocktails",
+    "ButtonLabel": "Mix Cocktail",
+    "Settings": {
+      "ShowEffects": {
+        "Name": "Show Effects to Players",
+        "Hint": "When enabled, players can see cocktail effect descriptions. When disabled, only the GM sees effects."
+      }
+    },
+    "Dialog": {
+      "Title": "Mix a Magical Cocktail",
+      "SelectLiquor": "Select a Liquor",
+      "SelectIngredients": "Select Ingredients",
+      "SelectGarnish": "Select a Garnish",
+      "MixCocktail": "Mix Cocktail",
+      "Cancel": "Cancel"
+    },
+    "Notifications": {
+      "NeedSubscription": "Full cocktail menu requires an Apprentice subscription or higher",
+      "Success": "Cocktail mixed successfully!",
+      "Error": "Failed to mix cocktail: {error}"
+    },
+    "Chat": {
+      "CocktailMixed": "{name} mixed a magical cocktail!",
+      "Effect": "Effect",
+      "Ingredients": "Ingredients",
+      "Garnish": "Garnish"
     }
   }
 }

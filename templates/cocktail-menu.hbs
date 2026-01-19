@@ -1,0 +1,30 @@
+<form class="cocktail-menu-form" autocomplete="off">
+  <div class="cocktail-menu-header">
+    <h2>🍸 Bixby's Cocktails</h2>
+    <p class="hint">Select a cocktail to mix, or let fate decide!</p>
+  </div>
+
+  <div class="cocktail-actions-top">
+    <button type="button" class="random-cocktail-btn">
+      <i class="fas fa-dice"></i> Mix Random Cocktail
+    </button>
+  </div>
+
+  <div class="cocktail-list">
+    {{#each cocktails}}
+    <div class="cocktail-item" data-id="{{this.id}}">
+      <div class="cocktail-item-name">{{this.name}}</div>
+      <div class="cocktail-item-liquor">{{this.liquor}}</div>
+      {{#if this.effect}}
+      <div class="cocktail-item-effect">{{this.effect}}</div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+
+  <div class="cocktail-actions-bottom">
+    <button type="button" class="mix-selected-btn">
+      <i class="fas fa-glass-cheers"></i> Mix Selected
+    </button>
+  </div>
+</form>

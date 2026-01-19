@@ -1,10 +1,10 @@
 /**
- * Quickbrush Image Generator for Foundry VTT
- * Generate fantasy RPG artwork using your own OpenAI API key or Wizzlethorpe Labs subscription
+ * Wizzlethorpe Labs Tools for Foundry VTT
+ * Includes Quickbrush AI image generator and Bixby's Cocktails magical drink mixer
  */
 
-const MODULE_ID = 'quickbrush';
-const API_BASE_URL = 'https://quickbrush.wizzlethorpe.com';
+const MODULE_ID = 'wizzlethorpe-labs';
+const API_BASE_URL = 'https://wizzlethorpe.com';
 
 /**
  * Load QuickbrushCore library dynamically
@@ -18,19 +18,19 @@ async function loadQuickbrushCore() {
   }
 
   // Load the bundled core library
-  const coreUrl = 'modules/quickbrush/scripts/quickbrush-core.js';
+  const coreUrl = 'modules/wizzlethorpe-labs/scripts/quickbrush-core.js';
   const absoluteUrl = new URL(coreUrl, window.location.origin).href;
 
-  console.log(`Quickbrush | Loading core library from: ${absoluteUrl}`);
+  console.log(`Wizzlethorpe | Loading core library from: ${absoluteUrl}`);
 
   try {
     const module = await import(absoluteUrl);
     QuickbrushCore = module.QuickbrushCore || module;
-    console.log('Quickbrush | Core library loaded successfully');
+    console.log('Wizzlethorpe | Quickbrush core library loaded successfully');
     return QuickbrushCore;
   } catch (error) {
-    console.error('Quickbrush | Failed to load core library', error);
-    ui.notifications.error('Quickbrush: Failed to load core library. Please check your module installation.');
+    console.error('Wizzlethorpe | Failed to load Quickbrush core library', error);
+    ui.notifications.error('Wizzlethorpe Labs: Failed to load Quickbrush core library. Please check your module installation.');
     throw error;
   }
 }
@@ -104,7 +104,7 @@ class WizzlethorpeAPI {
       return await this.pollForLinkCompletion(data.linkCode);
 
     } catch (error) {
-      console.error('Quickbrush | Link start error:', error);
+      console.error('Wizzlethorpe | Link start error:', error);
       throw error;
     }
   }
@@ -125,7 +125,7 @@ class WizzlethorpeAPI {
           await game.settings.set(MODULE_ID, 'wizzlethorpeToken', data.token);
           await game.settings.set(MODULE_ID, 'wizzlethorpeAccount', JSON.stringify(data.user));
 
-          console.log('Quickbrush | Account linked successfully:', data.user.name);
+          console.log('Wizzlethorpe | Account linked successfully:', data.user.name);
           return data.user;
         }
 
@@ -138,7 +138,7 @@ class WizzlethorpeAPI {
         if (error.message.includes('expired')) {
           throw error;
         }
-        console.warn('Quickbrush | Poll error, retrying...', error);
+        console.warn('Wizzlethorpe | Poll error, retrying...', error);
       }
     }
 
@@ -151,7 +151,7 @@ class WizzlethorpeAPI {
   static async unlink() {
     await game.settings.set(MODULE_ID, 'wizzlethorpeToken', '');
     await game.settings.set(MODULE_ID, 'wizzlethorpeAccount', '');
-    console.log('Quickbrush | Account unlinked');
+    console.log('Wizzlethorpe | Account unlinked');
   }
 
   /**
@@ -218,7 +218,7 @@ class QuickbrushAccountSettings extends FormApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: 'quickbrush-account-settings',
       title: 'Quickbrush Account Settings',
-      template: 'modules/quickbrush/templates/account-settings.hbs',
+      template: 'modules/wizzlethorpe-labs/templates/account-settings.hbs',
       width: 450,
       height: 'auto',
       classes: ['quickbrush-account-settings']
@@ -271,7 +271,7 @@ class QuickbrushAccountSettings extends FormApplication {
       ui.notifications.info(`Successfully linked to ${user.name} (${user.tierName})!`, { permanent: true });
       this.render();
     } catch (error) {
-      console.error('Quickbrush | Link account error:', error);
+      console.error('Wizzlethorpe | Link account error:', error);
       ui.notifications.error(`Failed to link account: ${error.message}`, { permanent: true });
     }
   }
@@ -309,7 +309,7 @@ class QuickbrushDialog extends FormApplication {
     return foundry.utils.mergeObject(super.defaultOptions, {
       id: 'quickbrush-dialog',
       title: game.i18n.localize('QUICKBRUSH.Dialog.Title'),
-      template: 'modules/quickbrush/templates/generate-dialog.hbs',
+      template: 'modules/wizzlethorpe-labs/templates/generate-dialog.hbs',
       width: 600,
       height: 700,
       classes: ['quickbrush-dialog'],
@@ -496,7 +496,7 @@ class QuickbrushDialog extends FormApplication {
 
       if (shouldUseAPI) {
         // Use Wizzlethorpe API (server-side generation)
-        console.log('Quickbrush | Using Wizzlethorpe API (server mode)');
+        console.log('Wizzlethorpe | Using Wizzlethorpe API (server mode)');
         ui.notifications.info('Generating with Wizzlethorpe Labs...', { permanent: false });
 
         const result = await WizzlethorpeAPI.generate({
@@ -519,7 +519,7 @@ class QuickbrushDialog extends FormApplication {
 
       } else if (shouldUseBYOKAPI) {
         // Use Wizzlethorpe API with user's API key (BYOK mode)
-        console.log('Quickbrush | Using Wizzlethorpe API (BYOK mode)');
+        console.log('Wizzlethorpe | Using Wizzlethorpe API (BYOK mode)');
         ui.notifications.info('Generating with your API key...', { permanent: false });
 
         const result = await WizzlethorpeAPI.generate({
@@ -538,7 +538,7 @@ class QuickbrushDialog extends FormApplication {
 
       } else {
         // Use local BYOK (legacy mode - direct OpenAI calls)
-        console.log('Quickbrush | Using local BYOK mode');
+        console.log('Wizzlethorpe | Using local BYOK mode');
 
         const core = await loadQuickbrushCore();
         const client = new core.OpenAIClient(openaiApiKey);
@@ -553,7 +553,7 @@ class QuickbrushDialog extends FormApplication {
         );
 
         refinedDescription = description.text;
-        console.log('Quickbrush | Refined description:', refinedDescription);
+        console.log('Wizzlethorpe | Refined description:', refinedDescription);
 
         // Step 2: Generate image
         ui.notifications.info('Step 2/2: Generating image...', { permanent: false });
@@ -787,7 +787,7 @@ class QuickbrushGallery {
     // Check if About page already exists
     let aboutPage = journal.pages.find(p => p.name === this.ABOUT_PAGE_NAME);
 
-    console.log('Quickbrush | Ensuring About page exists:', aboutPage ? 'found' : 'not found');
+    console.log('Wizzlethorpe | Ensuring About page exists:', aboutPage ? 'found' : 'not found');
 
     if (!aboutPage) {
       // Create the About page
@@ -801,13 +801,13 @@ class QuickbrushGallery {
         sort: 0 // Make it the first page
       }]);
       aboutPage = pages[0];
-      console.log('Quickbrush | Created About page');
+      console.log('Wizzlethorpe | Created About page');
     } else {
       // Update existing About page content (in case we've updated the text)
       await aboutPage.update({
         'text.content': this.getAboutPageContent()
       });
-      console.log('Quickbrush | Updated About page');
+      console.log('Wizzlethorpe | Updated About page');
     }
 
     return aboutPage;
@@ -866,7 +866,7 @@ function extractVisibleJournalText(html) {
   // Find all visible journal page articles
   const $visiblePages = $html.find('article.journal-entry-page');
 
-  console.log('Quickbrush | Found visible pages:', $visiblePages.length);
+  console.log('Wizzlethorpe | Found visible pages:', $visiblePages.length);
 
   if ($visiblePages.length > 0) {
     // Get text from all visible pages
@@ -890,7 +890,7 @@ function extractVisibleJournalText(html) {
  * Module Initialization
  */
 Hooks.once('init', () => {
-  console.log('Quickbrush | Initializing module');
+  console.log('Wizzlethorpe | Initializing module');
 
   // Register settings menu for account management
   game.settings.registerMenu(MODULE_ID, 'accountSettings', {
@@ -969,14 +969,14 @@ Hooks.once('init', () => {
 });
 
 Hooks.once('ready', async () => {
-  console.log('Quickbrush | Module ready');
+  console.log('Wizzlethorpe | Module ready');
 
   // Show the About page on first launch (only for GMs)
   if (game.user.isGM) {
     const aboutPageShown = game.settings.get(MODULE_ID, 'aboutPageShown');
 
     if (!aboutPageShown) {
-      console.log('Quickbrush | First launch detected, showing About page');
+      console.log('Wizzlethorpe | First launch detected, showing About page');
 
       // Create/get the gallery journal
       const journal = await QuickbrushGallery.getOrCreateGalleryJournal();
@@ -1002,7 +1002,7 @@ Hooks.once('ready', async () => {
  * Add Quickbrush options to journal sheet controls dropdown
  */
 Hooks.on('renderJournalEntrySheet', (app, html) => {
-  console.log('Quickbrush | Rendering journal sheet');
+  console.log('Wizzlethorpe | Rendering journal sheet');
   if (!game.user.isGM) return;
 
   // In V13, html might be an HTMLElement, not jQuery
@@ -1011,13 +1011,13 @@ Hooks.on('renderJournalEntrySheet', (app, html) => {
   // Find the controls dropdown menu
   const $menu = $html.find('menu.controls-dropdown');
 
-  console.log('Quickbrush | Controls menu found:', $menu.length > 0);
+  console.log('Wizzlethorpe | Controls menu found:', $menu.length > 0);
 
   if ($menu.length === 0) return;
 
   // Check if already added to prevent duplicates
   if ($menu.find('[data-action^="quickbrush-"]').length > 0) {
-    console.log('Quickbrush | Already added to journal menu, skipping');
+    console.log('Wizzlethorpe | Already added to journal menu, skipping');
     return;
   }
 
@@ -1058,9 +1058,9 @@ Hooks.on('renderJournalEntrySheet', (app, html) => {
         }
       });
 
-      console.log('Quickbrush | Opening dialog for type:', type);
-      console.log('Quickbrush | Text length:', textContent.length);
-      console.log('Quickbrush | Reference images:', referenceImages.length);
+      console.log('Wizzlethorpe | Opening dialog for type:', type);
+      console.log('Wizzlethorpe | Text length:', textContent.length);
+      console.log('Wizzlethorpe | Reference images:', referenceImages.length);
 
       new QuickbrushDialog({
         data: {
@@ -1084,7 +1084,7 @@ Hooks.on('renderJournalEntrySheet', (app, html) => {
 Hooks.on('renderJournalDirectory', (app, html) => {
   if (!game.user.isGM) return;
 
-  console.log('Quickbrush | Adding UI button to journal directory');
+  console.log('Wizzlethorpe | Adding UI button to journal directory');
 
   // In V13, html might be an HTMLElement, not jQuery, so wrap it
   const $html = html instanceof jQuery ? html : $(html);
@@ -1096,7 +1096,7 @@ Hooks.on('renderJournalDirectory', (app, html) => {
   `);
 
   button.on('click', function() {
-    console.log('Quickbrush | Opening generation dialog from directory button');
+    console.log('Wizzlethorpe | Opening generation dialog from directory button');
     new QuickbrushDialog().render(true);
   });
 
@@ -1140,7 +1140,7 @@ async function enrichAndStripText(text) {
     // Strip HTML tags from the enriched content
     return stripHTML(enriched);
   } catch (err) {
-    console.warn('Quickbrush | Failed to enrich text, using fallback:', err);
+    console.warn('Wizzlethorpe | Failed to enrich text, using fallback:', err);
     // Fallback: just strip @Embed tags manually and clean HTML
     const withoutEmbeds = text.replace(/@Embed\[[^\]]+\]/g, '');
     return stripHTML(withoutEmbeds);
@@ -1315,20 +1315,20 @@ function addQuickbrushToActorSheet(app, html, actorType) {
     $menu = $html.find('menu.context-menu');
   }
 
-  console.log('Quickbrush | Menu found:', $menu.length > 0, 'HTML classes:', $menu.attr('class'));
+  console.log('Wizzlethorpe | Menu found:', $menu.length > 0, 'HTML classes:', $menu.attr('class'));
 
   if ($menu.length === 0) return;
 
   // Get the actor document
   const actor = app.document || app.actor || app.object;
   if (!actor) {
-    console.warn('Quickbrush | Could not find actor document');
+    console.warn('Wizzlethorpe | Could not find actor document');
     return;
   }
 
   // Check if already added to prevent duplicates
   if ($menu.find('[data-action="quickbrush-actor"]').length > 0) {
-    console.log('Quickbrush | Already added, skipping');
+    console.log('Wizzlethorpe | Already added, skipping');
     return;
   }
 
@@ -1357,7 +1357,7 @@ function addQuickbrushToActorSheet(app, html, actorType) {
   `);
 
   menuItem.find('button').on('click', () => {
-    console.log('Quickbrush | Generate button clicked for actor:', actor.name);
+    console.log('Wizzlethorpe | Generate button clicked for actor:', actor.name);
 
     // Extract actor description/biography
     let textContent = actor.name;
@@ -1377,9 +1377,9 @@ function addQuickbrushToActorSheet(app, html, actorType) {
       referenceImages.push(actor.img);
     }
 
-    console.log('Quickbrush | Opening dialog for actor:', actor.name);
-    console.log('Quickbrush | Text length:', textContent.length);
-    console.log('Quickbrush | Reference images:', referenceImages.length);
+    console.log('Wizzlethorpe | Opening dialog for actor:', actor.name);
+    console.log('Wizzlethorpe | Text length:', textContent.length);
+    console.log('Wizzlethorpe | Reference images:', referenceImages.length);
 
     new QuickbrushDialog({
       targetDocument: actor,
@@ -1393,28 +1393,28 @@ function addQuickbrushToActorSheet(app, html, actorType) {
   });
 
   $menu.append(menuItem);
-  console.log('Quickbrush | Menu item appended to', $menu.attr('class'));
+  console.log('Wizzlethorpe | Menu item appended to', $menu.attr('class'));
 
   // Listen for the toggle button click to add to the dynamically created context menu
   const $toggleButton = $html.find('button[data-action="toggleControls"]');
   if ($toggleButton.length > 0) {
-    console.log('Quickbrush | Found toggle button, adding click listener');
+    console.log('Wizzlethorpe | Found toggle button, adding click listener');
 
     $toggleButton.on('click', () => {
-      console.log('Quickbrush | Toggle button clicked');
+      console.log('Wizzlethorpe | Toggle button clicked');
 
       // Wait for the context menu to be created
       setTimeout(() => {
         const $contextMenu = $('#context-menu');
-        console.log('Quickbrush | Context menu found:', $contextMenu.length > 0);
+        console.log('Wizzlethorpe | Context menu found:', $contextMenu.length > 0);
 
         if ($contextMenu.length > 0) {
           const $contextItems = $contextMenu.find('menu.context-items');
-          console.log('Quickbrush | Context items container found:', $contextItems.length > 0);
+          console.log('Wizzlethorpe | Context items container found:', $contextItems.length > 0);
 
           // Check if already added
           if ($contextItems.find('.quickbrush-context-item').length === 0) {
-            console.log('Quickbrush | Adding to context menu');
+            console.log('Wizzlethorpe | Adding to context menu');
 
             const contextItem = $(`
               <li class="context-item quickbrush-context-item">
@@ -1424,7 +1424,7 @@ function addQuickbrushToActorSheet(app, html, actorType) {
             `);
 
             contextItem.on('click', async () => {
-              console.log('Quickbrush | Context menu item clicked');
+              console.log('Wizzlethorpe | Context menu item clicked');
               // Close the context menu
               $contextMenu[0]?.hidePopover?.();
 
@@ -1437,8 +1437,8 @@ function addQuickbrushToActorSheet(app, html, actorType) {
                 referenceImages.push(actor.img);
               }
 
-              console.log('Quickbrush | Opening dialog for actor:', actor.name);
-              console.log('Quickbrush | Extracted text:', textContent.substring(0, 200) + '...');
+              console.log('Wizzlethorpe | Opening dialog for actor:', actor.name);
+              console.log('Wizzlethorpe | Extracted text:', textContent.substring(0, 200) + '...');
 
               new QuickbrushDialog({
                 targetDocument: actor,
@@ -1452,7 +1452,7 @@ function addQuickbrushToActorSheet(app, html, actorType) {
             });
 
             $contextItems.append(contextItem);
-            console.log('Quickbrush | Added to context menu');
+            console.log('Wizzlethorpe | Added to context menu');
 
             // Force the context menu to recalculate its height
             const contextMenuElement = $contextMenu[0];
@@ -1464,10 +1464,10 @@ function addQuickbrushToActorSheet(app, html, actorType) {
               // Force a reflow
               contextMenuElement.style.height = 'auto';
 
-              console.log('Quickbrush | Context menu height adjusted');
+              console.log('Wizzlethorpe | Context menu height adjusted');
             }
           } else {
-            console.log('Quickbrush | Already in context menu');
+            console.log('Wizzlethorpe | Already in context menu');
           }
         }
       }, 50);
@@ -1493,36 +1493,36 @@ Hooks.on('renderNPCActorSheet', (app, html) => {
  * Add Quickbrush options to Item sheet controls dropdown
  */
 Hooks.on('renderItemSheet5e', (app, html) => {
-  console.log('Quickbrush | Rendering item sheet');
+  console.log('Wizzlethorpe | Rendering item sheet');
   if (!game.user.isGM) return;
 
   const $html = html instanceof jQuery ? html : $(html);
 
   const item = app.document || app.item || app.object;
   if (!item) {
-    console.warn('Quickbrush | Could not find item document');
+    console.warn('Wizzlethorpe | Could not find item document');
     return;
   }
 
   // Listen for the toggle button click to add to the dynamically created context menu
   const $toggleButton = $html.find('button[data-action="toggleControls"]');
   if ($toggleButton.length > 0) {
-    console.log('Quickbrush | Found item toggle button, adding click listener');
+    console.log('Wizzlethorpe | Found item toggle button, adding click listener');
 
     $toggleButton.on('click', () => {
-      console.log('Quickbrush | Item toggle button clicked');
+      console.log('Wizzlethorpe | Item toggle button clicked');
 
       // Wait for the context menu to be created
       setTimeout(() => {
         const $contextMenu = $('#context-menu');
-        console.log('Quickbrush | Item context menu found:', $contextMenu.length > 0);
+        console.log('Wizzlethorpe | Item context menu found:', $contextMenu.length > 0);
 
         if ($contextMenu.length > 0) {
           const $contextItems = $contextMenu.find('menu.context-items');
 
           // Check if already added
           if ($contextItems.find('.quickbrush-context-item').length === 0) {
-            console.log('Quickbrush | Adding to item context menu');
+            console.log('Wizzlethorpe | Adding to item context menu');
 
             const contextItem = $(`
               <li class="context-item quickbrush-context-item">
@@ -1532,7 +1532,7 @@ Hooks.on('renderItemSheet5e', (app, html) => {
             `);
 
             contextItem.on('click', async () => {
-              console.log('Quickbrush | Item context menu item clicked');
+              console.log('Wizzlethorpe | Item context menu item clicked');
               // Close the context menu
               $contextMenu[0]?.hidePopover?.();
 
@@ -1545,8 +1545,8 @@ Hooks.on('renderItemSheet5e', (app, html) => {
                 referenceImages.push(item.img);
               }
 
-              console.log('Quickbrush | Opening dialog for item:', item.name);
-              console.log('Quickbrush | Extracted text:', textContent.substring(0, 200) + '...');
+              console.log('Wizzlethorpe | Opening dialog for item:', item.name);
+              console.log('Wizzlethorpe | Extracted text:', textContent.substring(0, 200) + '...');
 
               new QuickbrushDialog({
                 targetDocument: item,
@@ -1560,7 +1560,7 @@ Hooks.on('renderItemSheet5e', (app, html) => {
             });
 
             $contextItems.append(contextItem);
-            console.log('Quickbrush | Added to item context menu');
+            console.log('Wizzlethorpe | Added to item context menu');
 
             // Force the context menu to recalculate its height
             const contextMenuElement = $contextMenu[0];
@@ -1572,10 +1572,10 @@ Hooks.on('renderItemSheet5e', (app, html) => {
               // Force a reflow
               contextMenuElement.style.height = 'auto';
 
-              console.log('Quickbrush | Item context menu height adjusted');
+              console.log('Wizzlethorpe | Item context menu height adjusted');
             }
           } else {
-            console.log('Quickbrush | Already in item context menu');
+            console.log('Wizzlethorpe | Already in item context menu');
           }
         }
       }, 50);
@@ -1583,7 +1583,251 @@ Hooks.on('renderItemSheet5e', (app, html) => {
   }
 });
 
+/**
+ * Bixby's Cocktails - Magical Drink Mixer
+ */
+class BixbysCocktails {
+  static cocktailData = null;
+
+  /**
+   * Load cocktail data from the API
+   */
+  static async loadCocktailData() {
+    if (this.cocktailData) return this.cocktailData;
+
+    try {
+      const token = WizzlethorpeAPI.getToken();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/cocktails`, { headers });
+      if (!response.ok) {
+        throw new Error('Failed to load cocktail data');
+      }
+
+      this.cocktailData = await response.json();
+      console.log('Wizzlethorpe | Cocktail data loaded:', this.cocktailData.cocktails?.length, 'cocktails');
+      return this.cocktailData;
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to load cocktail data:', error);
+      ui.notifications.error('Failed to load cocktail menu. Check your subscription status.');
+      throw error;
+    }
+  }
+
+  /**
+   * Get a random cocktail from the menu
+   */
+  static async getRandomCocktail() {
+    const data = await this.loadCocktailData();
+    if (!data.cocktails || data.cocktails.length === 0) {
+      throw new Error('No cocktails available');
+    }
+
+    const cocktail = data.cocktails[Math.floor(Math.random() * data.cocktails.length)];
+    return cocktail;
+  }
+
+  /**
+   * Mix a cocktail and post to chat
+   */
+  static async mixCocktail(cocktailId = null) {
+    try {
+      const data = await this.loadCocktailData();
+
+      let cocktail;
+      if (cocktailId) {
+        cocktail = data.cocktails.find(c => c.id === cocktailId);
+        if (!cocktail) {
+          throw new Error('Cocktail not found');
+        }
+      } else {
+        cocktail = await this.getRandomCocktail();
+      }
+
+      // Get random garnish
+      const garnish = data.garnishes && data.garnishes.length > 0
+        ? data.garnishes[Math.floor(Math.random() * data.garnishes.length)]
+        : null;
+
+      // Build chat message
+      const speaker = ChatMessage.getSpeaker();
+      const content = this.buildChatContent(cocktail, garnish);
+
+      await ChatMessage.create({
+        speaker,
+        content,
+        type: CONST.CHAT_MESSAGE_TYPES.OTHER
+      });
+
+      ui.notifications.info(`Mixed: ${cocktail.name}!`);
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to mix cocktail:', error);
+      ui.notifications.error(`Failed to mix cocktail: ${error.message}`);
+    }
+  }
+
+  /**
+   * Build chat message content for a cocktail
+   */
+  static buildChatContent(cocktail, garnish) {
+    const showEffects = game.settings.get(MODULE_ID, 'showCocktailEffects');
+    const isGM = game.user.isGM;
+
+    let html = `
+      <div class="bixbys-cocktail-card">
+        <h3 class="cocktail-name">🍸 ${cocktail.name}</h3>
+        <p class="cocktail-liquor"><strong>Base:</strong> ${cocktail.liquor}</p>
+    `;
+
+    if (cocktail.ingredients && cocktail.ingredients.length > 0) {
+      html += `<p class="cocktail-ingredients"><strong>Ingredients:</strong> ${cocktail.ingredients.join(', ')}</p>`;
+    }
+
+    if (garnish) {
+      html += `<p class="cocktail-garnish"><strong>Garnish:</strong> ${garnish.name}</p>`;
+    }
+
+    // Show effects to GM always, to players only if setting allows
+    if (isGM || showEffects) {
+      if (cocktail.effect) {
+        html += `<div class="cocktail-effect"><strong>Effect:</strong> ${cocktail.effect}</div>`;
+      }
+      if (garnish && garnish.effect) {
+        html += `<div class="garnish-effect"><strong>Garnish Effect:</strong> ${garnish.effect}</div>`;
+      }
+    }
+
+    html += `</div>`;
+    return html;
+  }
+
+  /**
+   * Open the cocktail menu dialog
+   */
+  static async openMenu() {
+    try {
+      const data = await this.loadCocktailData();
+      new CocktailMenuDialog(data).render(true);
+    } catch (error) {
+      // Error already handled in loadCocktailData
+    }
+  }
+}
+
+/**
+ * Cocktail Menu Dialog
+ */
+class CocktailMenuDialog extends FormApplication {
+  constructor(cocktailData, options = {}) {
+    super({}, options);
+    this.cocktailData = cocktailData;
+    this.selectedCocktail = null;
+  }
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'cocktail-menu-dialog',
+      title: game.i18n.localize('COCKTAILS.Dialog.Title'),
+      template: 'modules/wizzlethorpe-labs/templates/cocktail-menu.hbs',
+      width: 500,
+      height: 600,
+      classes: ['cocktail-menu-dialog'],
+      closeOnSubmit: true,
+      submitOnChange: false
+    });
+  }
+
+  getData() {
+    return {
+      cocktails: this.cocktailData.cocktails || [],
+      garnishes: this.cocktailData.garnishes || [],
+      liquors: this.cocktailData.liquors || [],
+      selectedCocktail: this.selectedCocktail
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+
+    // Cocktail selection
+    html.find('.cocktail-item').on('click', (event) => {
+      const cocktailId = $(event.currentTarget).data('id');
+      this.selectedCocktail = cocktailId;
+      html.find('.cocktail-item').removeClass('selected');
+      $(event.currentTarget).addClass('selected');
+    });
+
+    // Random cocktail button
+    html.find('.random-cocktail-btn').on('click', async () => {
+      this.close();
+      await BixbysCocktails.mixCocktail();
+    });
+
+    // Mix selected button
+    html.find('.mix-selected-btn').on('click', async () => {
+      if (this.selectedCocktail) {
+        this.close();
+        await BixbysCocktails.mixCocktail(this.selectedCocktail);
+      } else {
+        ui.notifications.warn('Please select a cocktail first!');
+      }
+    });
+  }
+
+  async _updateObject(event, formData) {
+    // No form data to save
+  }
+}
+
+// Register Cocktails settings and hooks in the init hook
+Hooks.once('init', () => {
+  // Register cocktail-specific settings
+  game.settings.register(MODULE_ID, 'showCocktailEffects', {
+    name: game.i18n.localize('COCKTAILS.Settings.ShowEffects.Name'),
+    hint: game.i18n.localize('COCKTAILS.Settings.ShowEffects.Hint'),
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: true
+  });
+});
+
+/**
+ * Add Cocktails button to Journal Directory
+ */
+Hooks.on('renderJournalDirectory', (app, html) => {
+  if (!game.user.isGM) return;
+
+  const $html = html instanceof jQuery ? html : $(html);
+
+  const cocktailButton = $(`
+    <button class="cocktails-directory-btn">
+      <i class="fas fa-glass-martini-alt"></i> ${game.i18n.localize('COCKTAILS.ButtonLabel')}
+    </button>
+  `);
+
+  cocktailButton.on('click', () => {
+    BixbysCocktails.openMenu();
+  });
+
+  $html.find('.directory-header .header-actions').append(cocktailButton);
+});
+
 // Export for console access
+window.WizzlethorpeLabs = {
+  Quickbrush: {
+    Dialog: QuickbrushDialog,
+    Gallery: QuickbrushGallery
+  },
+  Cocktails: BixbysCocktails,
+  API: WizzlethorpeAPI,
+  AccountSettings: QuickbrushAccountSettings
+};
+
+// Backwards compatibility
 window.Quickbrush = {
   Dialog: QuickbrushDialog,
   Gallery: QuickbrushGallery,

@@ -1,6 +1,6 @@
-<form class="quickbrush-account-settings-form" autocomplete="off">
+<form class="wizzlethorpe-account-settings-form" autocomplete="off">
   <div class="account-header">
-    <img src="modules/quickbrush/images/wizzlethorpe-logo.png" alt="Wizzlethorpe Labs" class="account-logo" />
+    <img src="modules/wizzlethorpe-labs/images/wizzlethorpe-logo.png" alt="Wizzlethorpe Labs" class="account-logo" />
     <h2>Wizzlethorpe Labs Account</h2>
   </div>
 
@@ -22,7 +22,7 @@
     </div>
 
     <div class="account-features">
-      <h3>Your Features</h3>
+      <h3>Quickbrush Features</h3>
       <ul>
         <li class="feature-available">
           <i class="fas fa-check"></i> Character generation (BYOK)
@@ -43,6 +43,22 @@
         {{else}}
         <li class="feature-unavailable">
           <i class="fas fa-times"></i> Server-side generation (Requires Alchemist)
+        </li>
+        {{/if}}
+      </ul>
+
+      <h3>Bixby's Cocktails Features</h3>
+      <ul>
+        <li class="feature-available">
+          <i class="fas fa-check"></i> Sample cocktails
+        </li>
+        {{#if canUseBYOKAdvanced}}
+        <li class="feature-available">
+          <i class="fas fa-check"></i> Full cocktail menu
+        </li>
+        {{else}}
+        <li class="feature-unavailable">
+          <i class="fas fa-times"></i> Full cocktail menu (Requires Apprentice)
         </li>
         {{/if}}
       </ul>
@@ -102,7 +118,7 @@
         <i class="fab fa-patreon"></i> Subscribe on Patreon
       </a>
       |
-      <a href="https://quickbrush.wizzlethorpe.com" target="_blank">
+      <a href="https://wizzlethorpe.com" target="_blank">
         <i class="fas fa-external-link-alt"></i> Web App
       </a>
     </p>

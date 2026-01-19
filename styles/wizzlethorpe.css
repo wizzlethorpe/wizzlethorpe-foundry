@@ -1,0 +1,697 @@
+/* Wizzlethorpe Labs Module Styles */
+/* Dark Alchemical Theme - Based on Bixby's Cocktails */
+
+/* ============================================
+   CSS Variables - Alchemical Theme
+   ============================================ */
+:root {
+  --wiz-bg: #1a1410;
+  --wiz-bg-light: #2a221c;
+  --wiz-surface: #352c24;
+  --wiz-gold: #c9a961;
+  --wiz-gold-light: #e8d5a3;
+  --wiz-gold-dark: #8b7355;
+  --wiz-text: #f5f0e8;
+  --wiz-text-muted: #a89f94;
+  --wiz-accent: #e6461a;
+  --wiz-success: #4ade80;
+  --wiz-warning: #fbbf24;
+  --wiz-danger: #ef4444;
+}
+
+/* ============================================
+   Quickbrush Dialog
+   ============================================ */
+
+.quickbrush-dialog .window-content {
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+}
+
+.quickbrush-dialog .window-header {
+  background: var(--wiz-surface);
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.quickbrush-dialog label {
+  color: var(--wiz-gold);
+}
+
+.quickbrush-dialog input,
+.quickbrush-dialog select,
+.quickbrush-dialog textarea {
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  color: var(--wiz-text);
+}
+
+.quickbrush-dialog input:focus,
+.quickbrush-dialog select:focus,
+.quickbrush-dialog textarea:focus {
+  border-color: var(--wiz-gold);
+  box-shadow: 0 0 4px rgba(201, 169, 97, 0.3);
+}
+
+/* Submit button - Accent orange */
+.quickbrush-form .dialog-button.submit {
+  background: var(--wiz-accent);
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+
+.quickbrush-form .dialog-button.submit:hover {
+  background: #ff5722;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(230, 70, 26, 0.4);
+}
+
+/* Reference Images - Compact thumbnails */
+.reference-images-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.reference-image-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--wiz-gold-dark);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.reference-image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.reference-image-item .remove-reference-image {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  line-height: 1;
+}
+
+.reference-image-item .remove-reference-image:hover {
+  background: var(--wiz-danger);
+}
+
+.add-reference-image {
+  width: 80px;
+  height: 80px;
+  padding: 0.5rem;
+  background: var(--wiz-surface);
+  border: 2px dashed var(--wiz-gold-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--wiz-gold);
+  transition: all 0.2s;
+}
+
+.add-reference-image:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+}
+
+/* Context Menu - Make taller to show all items */
+#context-menu {
+  max-height: none !important;
+  height: auto !important;
+}
+
+#context-menu menu.context-items {
+  max-height: none !important;
+  height: auto !important;
+  overflow-y: visible !important;
+}
+
+/* ============================================
+   Directory Buttons
+   ============================================ */
+
+.quickbrush-directory-btn {
+  padding: 0.5rem 1rem;
+  background: var(--wiz-surface);
+  color: var(--wiz-gold);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.quickbrush-directory-btn:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.2);
+}
+
+.cocktails-directory-btn {
+  padding: 0.5rem 1rem;
+  background: var(--wiz-surface);
+  color: var(--wiz-gold);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.cocktails-directory-btn:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.2);
+}
+
+.quickbrush-sync-btn {
+  padding: 0.5rem 1rem;
+  background: var(--wiz-surface);
+  color: var(--wiz-success);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.quickbrush-sync-btn:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-success);
+  box-shadow: 0 2px 8px rgba(74, 222, 128, 0.2);
+}
+
+/* ============================================
+   Account Settings Dialog
+   ============================================ */
+
+.wizzlethorpe-account-settings .window-content,
+.quickbrush-account-settings .window-content {
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+  padding: 1rem;
+}
+
+.wizzlethorpe-account-settings-form,
+.quickbrush-account-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.account-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.account-logo {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.account-header h2 {
+  margin: 0;
+  color: var(--wiz-gold);
+  font-size: 1.25rem;
+}
+
+/* Linked Account Status */
+.account-status.linked .account-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.account-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--wiz-gold-dark);
+}
+
+.account-avatar-placeholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--wiz-bg-light);
+  border: 2px solid var(--wiz-gold-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--wiz-gold);
+}
+
+.account-details {
+  flex: 1;
+}
+
+.account-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--wiz-text);
+}
+
+.account-email {
+  font-size: 0.85rem;
+  color: var(--wiz-text-muted);
+}
+
+.account-tier {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+.tier-free {
+  background: var(--wiz-bg-light);
+  color: var(--wiz-text-muted);
+}
+.tier-apprentice {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--wiz-success);
+}
+.tier-alchemist {
+  background: rgba(251, 191, 36, 0.2);
+  color: var(--wiz-warning);
+}
+.tier-archmage {
+  background: rgba(201, 169, 97, 0.2);
+  color: var(--wiz-gold-light);
+}
+
+/* Features List */
+.account-features {
+  padding: 1rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.account-features h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--wiz-gold);
+}
+
+.account-features ul {
+  list-style: none;
+  margin: 0 0 1rem 0;
+  padding: 0;
+}
+
+.account-features li {
+  padding: 0.4rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.feature-available {
+  color: var(--wiz-success);
+}
+.feature-unavailable {
+  color: var(--wiz-text-muted);
+}
+
+/* Not Linked Status */
+.account-status.not-linked .not-linked-message {
+  text-align: center;
+  padding: 2rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.not-linked-message i {
+  font-size: 3rem;
+  color: var(--wiz-gold-dark);
+  margin-bottom: 1rem;
+}
+
+.not-linked-message p {
+  margin: 0.5rem 0;
+  color: var(--wiz-text);
+}
+
+.not-linked-message .hint {
+  font-size: 0.85rem;
+  color: var(--wiz-text-muted);
+}
+
+/* Tier Info */
+.tier-info {
+  padding: 1rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.tier-info h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--wiz-gold);
+}
+
+.tier-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.tier-item {
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  background: var(--wiz-bg);
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.tier-item .tier-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--wiz-gold);
+}
+
+.tier-item .tier-price {
+  font-size: 0.8rem;
+  margin: 0.25rem 0;
+  color: var(--wiz-text);
+}
+
+.tier-item .tier-features {
+  font-size: 0.75rem;
+  color: var(--wiz-text-muted);
+}
+
+/* Account Actions */
+.account-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.link-account-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--wiz-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.link-account-btn:hover {
+  background: #ff5722;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 70, 26, 0.4);
+}
+
+.unlink-account-btn {
+  padding: 0.5rem 1rem;
+  background: var(--wiz-bg-light);
+  color: var(--wiz-text-muted);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.unlink-account-btn:hover {
+  background: var(--wiz-surface);
+  color: var(--wiz-text);
+  border-color: var(--wiz-gold);
+}
+
+/* Footer */
+.account-footer {
+  text-align: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.2);
+  font-size: 0.85rem;
+}
+
+.account-footer a {
+  color: var(--wiz-gold);
+  text-decoration: none;
+}
+
+.account-footer a:hover {
+  color: var(--wiz-gold-light);
+  text-decoration: underline;
+}
+
+/* ============================================
+   Bixby's Cocktails - Menu Dialog
+   ============================================ */
+
+.cocktail-menu-dialog .window-content {
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+}
+
+.cocktail-menu-dialog .window-header {
+  background: var(--wiz-surface);
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.cocktail-menu-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.cocktail-menu-header {
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.cocktail-menu-header h2 {
+  margin: 0;
+  color: var(--wiz-gold);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.cocktail-menu-header .hint {
+  color: var(--wiz-text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.cocktail-actions-top {
+  display: flex;
+  justify-content: center;
+}
+
+.random-cocktail-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--wiz-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.random-cocktail-btn:hover {
+  background: #ff5722;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(230, 70, 26, 0.4);
+}
+
+.cocktail-list {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+}
+
+.cocktail-item {
+  padding: 0.75rem 1rem;
+  background: var(--wiz-bg);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cocktail-item:hover {
+  background: var(--wiz-bg-light);
+  border-color: rgba(201, 169, 97, 0.3);
+}
+
+.cocktail-item.selected {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  box-shadow: 0 0 12px rgba(201, 169, 97, 0.2);
+}
+
+.cocktail-item-name {
+  font-weight: bold;
+  color: var(--wiz-gold-light);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.cocktail-item-liquor {
+  font-size: 0.85rem;
+  color: var(--wiz-gold);
+}
+
+.cocktail-item-effect {
+  font-size: 0.8rem;
+  color: var(--wiz-text-muted);
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.cocktail-actions-bottom {
+  display: flex;
+  justify-content: center;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.mix-selected-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.mix-selected-btn:hover {
+  background: var(--wiz-gold-light);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(201, 169, 97, 0.4);
+}
+
+/* ============================================
+   Cocktail Chat Card
+   ============================================ */
+
+.bixbys-cocktail-card {
+  padding: 1rem;
+  background: var(--wiz-surface);
+  border-radius: 12px;
+  border: 1px solid rgba(201, 169, 97, 0.2);
+  border-left: 4px solid var(--wiz-gold);
+}
+
+.bixbys-cocktail-card .cocktail-name {
+  margin: 0 0 0.5rem 0;
+  color: var(--wiz-gold);
+  font-size: 1.2rem;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.bixbys-cocktail-card .cocktail-liquor,
+.bixbys-cocktail-card .cocktail-ingredients,
+.bixbys-cocktail-card .cocktail-garnish {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--wiz-text);
+}
+
+.bixbys-cocktail-card .cocktail-liquor strong,
+.bixbys-cocktail-card .cocktail-ingredients strong,
+.bixbys-cocktail-card .cocktail-garnish strong {
+  color: var(--wiz-gold);
+}
+
+.bixbys-cocktail-card .cocktail-effect,
+.bixbys-cocktail-card .garnish-effect {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--wiz-bg);
+  border-radius: 8px;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+  font-size: 0.85rem;
+  color: var(--wiz-text-muted);
+}
+
+.bixbys-cocktail-card .cocktail-effect strong,
+.bixbys-cocktail-card .garnish-effect strong {
+  color: var(--wiz-gold);
+}
