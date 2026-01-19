@@ -1,7 +1,7 @@
 {
   "id": "wizzlethorpe-labs",
   "title": "Wizzlethorpe Labs Tools",
-  "description": "Dr. Bixby Wizzlethorpe's eccentric alchemical tools for TTRPGs. Includes Quickbrush AI image generator and Bixby's Cocktails magical drink mixer.",
+  "description": "Tools from Wizzlethorpe Labs: image generation for characters, creatures, items, and scenes, plus magical cocktails with unpredictable effects.",
   "version": "3.0.0",
   "compatibility": {
     "minimum": "13.0",
