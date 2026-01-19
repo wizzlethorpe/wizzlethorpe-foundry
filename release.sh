@@ -92,9 +92,8 @@ cd "$BUILD_DIR"
 zip -r module.zip "$MODULE_ID"
 cd "$SCRIPT_DIR"
 
-# Copy files to script directory for release
+# Copy zip to script directory for release
 cp "$BUILD_DIR/module.zip" ./module.zip
-cp module.json ./module.json
 
 echo -e "${GREEN}Created module.zip${NC}"
 
