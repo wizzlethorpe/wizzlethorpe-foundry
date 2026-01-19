@@ -1,30 +1,127 @@
 <form class="cocktail-menu-form" autocomplete="off">
   <div class="cocktail-menu-header">
     <h2>🍸 Bixby's Cocktails</h2>
-    <p class="hint">Select a cocktail to mix, or let fate decide!</p>
   </div>
 
-  <div class="cocktail-actions-top">
-    <button type="button" class="random-cocktail-btn">
-      <i class="fas fa-dice"></i> Mix Random Cocktail
-    </button>
+  <!-- Tabs -->
+  <div class="cocktail-tabs">
+    <button type="button" class="cocktail-tab active" data-tab="cocktails">Cocktails</button>
+    <button type="button" class="cocktail-tab" data-tab="ingredients">Ingredients</button>
   </div>
 
-  <div class="cocktail-list">
-    {{#each cocktails}}
-    <div class="cocktail-item" data-id="{{this.id}}">
-      <div class="cocktail-item-name">{{this.name}}</div>
-      <div class="cocktail-item-liquor">{{this.liquor}}</div>
-      {{#if this.effect}}
-      <div class="cocktail-item-effect">{{this.effect}}</div>
-      {{/if}}
+  <!-- Cocktails Tab -->
+  <div class="cocktail-tab-pane active" data-pane="cocktails">
+    <!-- Filters -->
+    <div class="cocktail-filters">
+      <div class="filter-group">
+        <label>Base Liquor</label>
+        <select class="filter-liquor">
+          <option value="">All Liquors</option>
+          {{#each liquors}}
+          <option value="{{this.id}}">{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Ingredient</label>
+        <select class="filter-ingredient">
+          <option value="">All Ingredients</option>
+          {{#each ingredients}}
+          <option value="{{this.id}}">{{this.name}}</option>
+          {{/each}}
+        </select>
+      </div>
     </div>
-    {{/each}}
+
+    <!-- Garnish Selector -->
+    <div class="garnish-selector">
+      <label>Garnish (Optional)</label>
+      <div class="garnish-options">
+        {{#each garnishes}}
+        <button type="button" class="garnish-btn" data-id="{{this.id}}" title="{{this.description}}">{{this.name}}</button>
+        {{/each}}
+      </div>
+      <p class="garnish-hint">Select a garnish to see pairing modifiers.</p>
+    </div>
+
+    <!-- Random Button -->
+    <div class="cocktail-actions-top">
+      <button type="button" class="random-cocktail-btn">
+        <i class="fas fa-dice"></i> Mix Random Cocktail
+      </button>
+    </div>
+
+    <!-- Cocktails Grid -->
+    <div class="cocktail-grid">
+      {{#each cocktails}}
+      <div class="cocktail-card" data-id="{{this.id}}" data-liquor="{{this.liquorId}}" data-ingredient="{{this.ingredientId}}">
+        <div class="cocktail-card-header">
+          <div class="cocktail-color" style="background: {{this.color}}"></div>
+          <div class="cocktail-card-title">
+            <span class="cocktail-card-name">{{this.name}}</span>
+            <span class="cocktail-card-modifier"></span>
+          </div>
+        </div>
+        <p class="cocktail-card-combo">{{this.liquorName}} + {{this.ingredientName}}</p>
+        <p class="cocktail-card-desc">"{{this.description}}"</p>
+        <div class="cocktail-card-effects">
+          <strong>Roll Effects (1d4)</strong>
+          <div class="effect-row"><span class="effect-badge bad">1</span> {{this.effects.roll1}}</div>
+          <div class="effect-row"><span class="effect-badge warn">2</span> {{this.effects.roll2}}</div>
+          <div class="effect-row"><span class="effect-badge good">3</span> {{this.effects.roll3}}</div>
+          <div class="effect-row"><span class="effect-badge great">4</span> {{this.effects.roll4}}</div>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+
+    <!-- Mix Selected -->
+    <div class="cocktail-actions-bottom">
+      <button type="button" class="mix-selected-btn">
+        <i class="fas fa-glass-cheers"></i> Mix Selected
+      </button>
+    </div>
   </div>
 
-  <div class="cocktail-actions-bottom">
-    <button type="button" class="mix-selected-btn">
-      <i class="fas fa-glass-cheers"></i> Mix Selected
-    </button>
+  <!-- Ingredients Tab -->
+  <div class="cocktail-tab-pane" data-pane="ingredients">
+    <!-- Environment Filter -->
+    <div class="environment-filter">
+      <label>Filter by Environment</label>
+      <div class="environment-options">
+        <button type="button" class="env-btn active" data-env="">All</button>
+        <button type="button" class="env-btn" data-env="Arctic">Arctic</button>
+        <button type="button" class="env-btn" data-env="Coastal">Coastal</button>
+        <button type="button" class="env-btn" data-env="Desert">Desert</button>
+        <button type="button" class="env-btn" data-env="Forest">Forest</button>
+        <button type="button" class="env-btn" data-env="Grassland">Grassland</button>
+        <button type="button" class="env-btn" data-env="Hill">Hill</button>
+        <button type="button" class="env-btn" data-env="Mountain">Mountain</button>
+        <button type="button" class="env-btn" data-env="Swamp">Swamp</button>
+        <button type="button" class="env-btn" data-env="Underdark">Underdark</button>
+        <button type="button" class="env-btn" data-env="Underwater">Underwater</button>
+        <button type="button" class="env-btn" data-env="Urban">Urban</button>
+      </div>
+    </div>
+
+    <!-- Ingredients Grid -->
+    <div class="ingredient-grid">
+      {{#each ingredients}}
+      <div class="ingredient-card" data-environments="{{this.environmentsJoined}}">
+        <div class="ingredient-card-header">
+          <div class="ingredient-color" style="background: {{this.color}}"></div>
+          <span class="ingredient-card-name">{{this.name}}</span>
+        </div>
+        <p class="ingredient-card-desc">{{this.description}}</p>
+        <p class="ingredient-card-found"><strong>Found In:</strong> {{this.foundIn}}</p>
+        <div class="ingredient-environments">
+          {{#each this.environments}}
+          <span class="env-badge">{{this}}</span>
+          {{/each}}
+        </div>
+        <blockquote class="ingredient-quote">"{{this.wishlistQuote}}"</blockquote>
+      </div>
+      {{/each}}
+    </div>
   </div>
 </form>

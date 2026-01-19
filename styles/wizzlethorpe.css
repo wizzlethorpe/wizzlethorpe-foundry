@@ -45,6 +45,12 @@
   color: var(--wiz-text);
 }
 
+/* Dropdown options */
+.quickbrush-dialog select option {
+  background: var(--wiz-surface);
+  color: var(--wiz-text);
+}
+
 .quickbrush-dialog input:focus,
 .quickbrush-dialog select:focus,
 .quickbrush-dialog textarea:focus {
@@ -52,18 +58,42 @@
   box-shadow: 0 0 4px rgba(201, 169, 97, 0.3);
 }
 
-/* Submit button - Accent orange */
+/* Placeholder text */
+.quickbrush-dialog input::placeholder,
+.quickbrush-dialog textarea::placeholder {
+  color: var(--wiz-text-muted);
+  opacity: 0.7;
+}
+
+/* Hint/description text */
+.quickbrush-dialog .notes,
+.quickbrush-dialog .hint,
+.quickbrush-dialog p.notes,
+.quickbrush-dialog .form-group .hint {
+  color: var(--wiz-text-muted);
+}
+
+/* Form group labels and hints */
+.quickbrush-dialog .form-group > label {
+  color: var(--wiz-gold);
+}
+
+.quickbrush-dialog .form-group p {
+  color: var(--wiz-text-muted);
+}
+
+/* Submit button - Gold theme */
 .quickbrush-form .dialog-button.submit {
-  background: var(--wiz-accent);
-  color: white;
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
   border: none;
   font-weight: bold;
 }
 
 .quickbrush-form .dialog-button.submit:hover {
-  background: #ff5722;
+  background: var(--wiz-gold-light);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(230, 70, 26, 0.4);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.4);
 }
 
 /* Reference Images - Compact thumbnails */
@@ -447,8 +477,8 @@
 
 .link-account-btn {
   padding: 0.75rem 1.5rem;
-  background: var(--wiz-accent);
-  color: white;
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -461,9 +491,9 @@
 }
 
 .link-account-btn:hover {
-  background: #ff5722;
+  background: var(--wiz-gold-light);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(230, 70, 26, 0.4);
+  box-shadow: 0 4px 12px rgba(201, 169, 97, 0.4);
 }
 
 .unlink-account-btn {
@@ -543,19 +573,156 @@
   margin-top: 0.5rem;
 }
 
+/* Cocktail dialog hints and descriptions */
+.cocktail-menu-dialog .notes,
+.cocktail-menu-dialog .hint,
+.cocktail-menu-dialog p.notes {
+  color: var(--wiz-text-muted);
+}
+
+.cocktail-menu-dialog input::placeholder,
+.cocktail-menu-dialog textarea::placeholder {
+  color: var(--wiz-text-muted);
+  opacity: 0.7;
+}
+
+/* Tabs */
+.cocktail-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+  margin-bottom: 1rem;
+}
+
+.cocktail-tab {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--wiz-text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.cocktail-tab:hover {
+  color: var(--wiz-text);
+}
+
+.cocktail-tab.active {
+  color: var(--wiz-gold);
+  border-bottom-color: var(--wiz-gold);
+}
+
+.cocktail-tab-pane {
+  display: none;
+}
+
+.cocktail-tab-pane.active {
+  display: block;
+}
+
+/* Filters */
+.cocktail-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.filter-group label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--wiz-gold);
+  margin-bottom: 0.25rem;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  height: 36px;
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  color: var(--wiz-text);
+  font-size: 0.85rem;
+}
+
+.filter-group select option {
+  background: var(--wiz-surface);
+  color: var(--wiz-text);
+}
+
+/* Garnish Selector */
+.garnish-selector {
+  padding: 0.5rem 0.75rem;
+  background: var(--wiz-surface);
+  border-radius: 8px;
+  margin-bottom: 0.75rem;
+}
+
+.garnish-selector > label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--wiz-gold);
+  margin-bottom: 0.25rem;
+}
+
+.garnish-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+  align-items: flex-start;
+}
+
+.garnish-btn {
+  display: inline-block;
+  width: auto !important;
+  flex: 0 0 auto;
+  padding: 0.2rem 0.5rem;
+  background: var(--wiz-bg);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 3px;
+  color: var(--wiz-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.2;
+}
+
+.garnish-btn:hover {
+  border-color: var(--wiz-gold);
+  color: var(--wiz-text);
+}
+
+.garnish-btn.active {
+  background: var(--wiz-gold);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-bg);
+}
+
+.garnish-hint {
+  font-size: 0.7rem;
+  color: var(--wiz-text-muted);
+  margin: 0;
+}
+
+/* Actions */
 .cocktail-actions-top {
   display: flex;
   justify-content: center;
+  margin-bottom: 0.75rem;
 }
 
 .random-cocktail-btn {
-  padding: 0.75rem 1.5rem;
-  background: var(--wiz-accent);
-  color: white;
+  padding: 0.5rem 1rem;
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
   border: none;
-  border-radius: 8px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -564,11 +731,258 @@
 }
 
 .random-cocktail-btn:hover {
-  background: #ff5722;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(230, 70, 26, 0.4);
+  background: var(--wiz-gold-light);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.4);
 }
 
+/* Cocktail Grid */
+.cocktail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: var(--wiz-bg);
+  border-radius: 8px;
+}
+
+.cocktail-card {
+  padding: 0.75rem;
+  background: var(--wiz-surface);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cocktail-card:hover {
+  border-color: rgba(201, 169, 97, 0.3);
+}
+
+.cocktail-card.selected {
+  border-color: var(--wiz-gold);
+  box-shadow: 0 0 8px rgba(201, 169, 97, 0.3);
+}
+
+.cocktail-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.cocktail-color {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.cocktail-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cocktail-card-name {
+  font-weight: bold;
+  color: var(--wiz-gold-light);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.cocktail-card-modifier {
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+}
+
+.cocktail-card-modifier.good {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--wiz-success);
+}
+
+.cocktail-card-modifier.bad {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--wiz-danger);
+}
+
+.cocktail-card-combo {
+  font-size: 0.8rem;
+  color: var(--wiz-gold);
+  margin: 0 0 0.375rem 0;
+}
+
+.cocktail-card-desc {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--wiz-text);
+  margin: 0 0 0.5rem 0;
+}
+
+.cocktail-card-effects {
+  font-size: 0.75rem;
+  color: var(--wiz-text-muted);
+}
+
+.cocktail-card-effects strong {
+  display: block;
+  color: var(--wiz-gold);
+  margin-bottom: 0.25rem;
+}
+
+.effect-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin-bottom: 0.125rem;
+}
+
+.effect-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.effect-badge.bad { background: var(--wiz-danger); color: white; }
+.effect-badge.warn { background: var(--wiz-warning); color: var(--wiz-bg); }
+.effect-badge.good { background: var(--wiz-success); color: var(--wiz-bg); }
+.effect-badge.great { background: #3b82f6; color: white; }
+
+/* Environment Filter */
+.environment-filter {
+  margin-bottom: 0.75rem;
+}
+
+.environment-filter > label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--wiz-gold);
+  margin-bottom: 0.25rem;
+}
+
+.environment-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: flex-start;
+}
+
+.env-btn {
+  display: inline-block;
+  width: auto !important;
+  flex: 0 0 auto;
+  padding: 0.2rem 0.5rem;
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 3px;
+  color: var(--wiz-text-muted);
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.2;
+}
+
+.env-btn:hover {
+  border-color: var(--wiz-gold);
+  color: var(--wiz-text);
+}
+
+.env-btn.active {
+  background: var(--wiz-gold);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-bg);
+}
+
+/* Ingredient Grid */
+.ingredient-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background: var(--wiz-bg);
+  border-radius: 8px;
+}
+
+.ingredient-card {
+  padding: 0.75rem;
+  background: var(--wiz-surface);
+  border-radius: 8px;
+}
+
+.ingredient-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.375rem;
+}
+
+.ingredient-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.ingredient-card-name {
+  font-weight: bold;
+  color: var(--wiz-gold-light);
+}
+
+.ingredient-card-desc {
+  font-size: 0.8rem;
+  color: var(--wiz-text);
+  margin: 0 0 0.375rem 0;
+}
+
+.ingredient-card-found {
+  font-size: 0.8rem;
+  color: var(--wiz-text);
+  margin: 0 0 0.375rem 0;
+}
+
+.ingredient-card-found strong {
+  color: var(--wiz-gold);
+}
+
+.ingredient-environments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.env-badge {
+  padding: 0.125rem 0.375rem;
+  background: var(--wiz-bg);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--wiz-text-muted);
+}
+
+.ingredient-quote {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--wiz-text-muted);
+  border-left: 2px solid var(--wiz-gold-dark);
+  padding-left: 0.5rem;
+  margin: 0;
+}
+
+/* Legacy cocktail list (kept for backwards compat) */
 .cocktail-list {
   max-height: 300px;
   overflow-y: auto;
@@ -666,7 +1080,14 @@
   font-family: Georgia, 'Times New Roman', serif;
 }
 
+.bixbys-cocktail-card .cocktail-description {
+  margin: 0.25rem 0 0.75rem 0;
+  font-size: 0.9rem;
+  color: var(--wiz-text);
+}
+
 .bixbys-cocktail-card .cocktail-liquor,
+.bixbys-cocktail-card .cocktail-ingredient,
 .bixbys-cocktail-card .cocktail-ingredients,
 .bixbys-cocktail-card .cocktail-garnish {
   margin: 0.25rem 0;

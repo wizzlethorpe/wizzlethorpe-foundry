@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Quickbrush Foundry Module Release Script
+# Wizzlethorpe Labs Foundry Module Release Script
 # Creates a GitHub release and publishes to FoundryVTT package registry
 
 set -e
@@ -15,11 +15,16 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+# Load environment variables from .env if it exists
+if [ -f ".env" ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # Read current version from module.json
 CURRENT_VERSION=$(jq -r '.version' module.json)
 MODULE_ID=$(jq -r '.id' module.json)
 
-echo -e "${GREEN}Quickbrush Foundry Module Release Script${NC}"
+echo -e "${GREEN}Wizzlethorpe Labs Foundry Module Release Script${NC}"
 echo "========================================"
 echo "Current version: $CURRENT_VERSION"
 echo ""
@@ -61,7 +66,7 @@ fi
 
 # Update download URL to use specific version tag
 echo -e "${YELLOW}Updating download URL for version $NEW_VERSION...${NC}"
-jq --arg v "$NEW_VERSION" '.download = "https://github.com/wizzlethorpe/quickbrush/releases/download/v" + $v + "/module.zip"' module.json > module.json.tmp && mv module.json.tmp module.json
+jq --arg v "$NEW_VERSION" '.download = "https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/v" + $v + "/module.zip"' module.json > module.json.tmp && mv module.json.tmp module.json
 
 # Create build directory
 BUILD_DIR=$(mktemp -d)
@@ -95,14 +100,14 @@ echo -e "${GREEN}Created module.zip${NC}"
 
 # Create GitHub release
 TAG="v$NEW_VERSION"
-RELEASE_NOTES="## Quickbrush v$NEW_VERSION
+RELEASE_NOTES="## Wizzlethorpe Labs v$NEW_VERSION
 
 ### Changes
 - See commit history for details
 
 ### Installation
-- **Manifest URL:** \`https://github.com/wizzlethorpe/quickbrush/releases/latest/download/module.json\`
-- **Direct Download:** \`https://github.com/wizzlethorpe/quickbrush/releases/download/$TAG/module.zip\`
+- **Manifest URL:** \`https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/latest/download/module.json\`
+- **Direct Download:** \`https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/$TAG/module.zip\`
 
 ### Compatibility
 - Foundry VTT v13+"
@@ -119,7 +124,7 @@ fi
 
 # Create the release with assets
 gh release create "$TAG" \
-    --title "Quickbrush $NEW_VERSION" \
+    --title "Wizzlethorpe Labs $NEW_VERSION" \
     --notes "$RELEASE_NOTES" \
     module.zip \
     module.json
@@ -132,33 +137,34 @@ echo -e "${YELLOW}Do you want to publish to FoundryVTT Package Registry? (y/n)${
 read -r PUBLISH_FOUNDRY
 
 if [ "$PUBLISH_FOUNDRY" = "y" ] || [ "$PUBLISH_FOUNDRY" = "Y" ]; then
-    # Check for FoundryVTT API token
-    if [ -z "$FOUNDRY_API_TOKEN" ]; then
-        echo -e "${YELLOW}Enter your FoundryVTT API token (or set FOUNDRY_API_TOKEN env var):${NC}"
-        read -rs FOUNDRY_API_TOKEN
+    # Check for FoundryVTT API token (prefer FOUNDRY_RELEASE_TOKEN from .env)
+    FOUNDRY_TOKEN="${FOUNDRY_RELEASE_TOKEN:-$FOUNDRY_API_TOKEN}"
+    if [ -z "$FOUNDRY_TOKEN" ]; then
+        echo -e "${YELLOW}Enter your FoundryVTT API token (or add FOUNDRY_RELEASE_TOKEN to .env):${NC}"
+        read -rs FOUNDRY_TOKEN
         echo ""
     fi
 
-    if [ -z "$FOUNDRY_API_TOKEN" ]; then
+    if [ -z "$FOUNDRY_TOKEN" ]; then
         echo -e "${RED}Error: FoundryVTT API token is required for publishing.${NC}"
         echo "Get your token at: https://foundryvtt.com/me/api-tokens"
     else
         echo -e "${YELLOW}Publishing to FoundryVTT...${NC}"
 
         # FoundryVTT Package Release API
-        MANIFEST_URL="https://github.com/wizzlethorpe/quickbrush/releases/download/$TAG/module.json"
+        MANIFEST_URL="https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/$TAG/module.json"
 
         RESPONSE=$(curl -s -X POST \
             "https://api.foundryvtt.com/_api/packages/release_version/" \
             -H "Content-Type: application/json" \
-            -H "Authorization: $FOUNDRY_API_TOKEN" \
+            -H "Authorization: $FOUNDRY_TOKEN" \
             -d "{
                 \"id\": \"$MODULE_ID\",
                 \"dry-run\": false,
                 \"release\": {
                     \"version\": \"$NEW_VERSION\",
                     \"manifest\": \"$MANIFEST_URL\",
-                    \"notes\": \"https://github.com/wizzlethorpe/quickbrush/releases/tag/$TAG\",
+                    \"notes\": \"https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/tag/$TAG\",
                     \"compatibility\": {
                         \"minimum\": \"13\",
                         \"verified\": \"13\"
@@ -179,10 +185,10 @@ fi
 rm -rf "$BUILD_DIR"
 
 # Reset download URL back to latest for development
-jq '.download = "https://github.com/wizzlethorpe/quickbrush/releases/latest/download/module.zip"' module.json > module.json.tmp && mv module.json.tmp module.json
+jq '.download = "https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/latest/download/module.zip"' module.json > module.json.tmp && mv module.json.tmp module.json
 
 echo ""
 echo -e "${GREEN}Release complete!${NC}"
 echo ""
-echo "Release URL: https://github.com/wizzlethorpe/quickbrush/releases/tag/$TAG"
-echo "Manifest URL: https://github.com/wizzlethorpe/quickbrush/releases/download/$TAG/module.json"
+echo "Release URL: https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/tag/$TAG"
+echo "Manifest URL: https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/$TAG/module.json"

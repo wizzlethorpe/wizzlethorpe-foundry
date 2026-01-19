@@ -97,7 +97,7 @@ class WizzlethorpeAPI {
       }
 
       // Open the link page in a new browser window
-      const linkUrl = `${API_BASE_URL}/link.html?code=${data.linkCode}`;
+      const linkUrl = `${API_BASE_URL}/link?code=${data.linkCode}&device=Foundry%20VTT`;
       window.open(linkUrl, '_blank', 'width=500,height=600');
 
       // Start polling for completion
@@ -642,8 +642,8 @@ class QuickbrushDialog extends FormApplication {
  * Gallery Manager
  */
 class QuickbrushGallery {
-  static GALLERY_NAME = 'Quickbrush Gallery';
-  static ABOUT_PAGE_NAME = 'About Quickbrush';
+  static GALLERY_NAME = 'Wizzlethorpe Labs Gallery';
+  static ABOUT_PAGE_NAME = 'Welcome';
 
   /**
    * Get the About page content
@@ -652,93 +652,77 @@ class QuickbrushGallery {
     return `
       <div style="max-width: 800px; margin: 0 auto;">
         <h1 style="text-align: center; font-size: 2em; margin-bottom: 0.5em;">
-          🎨 Welcome to Quickbrush! 🎨
+          Welcome to Wizzlethorpe Labs!
         </h1>
 
-        <p style="font-style: italic; font-size: 1.1em;">
-          <strong>Greetings, dear adventurer!</strong>
-        </p>
-        <p>
-          I'm <strong>Wispy Quickbrush</strong>, halfling artist extraordinaire and your magical companion in creating breathtaking artwork for your campaigns! With a flick of my enchanted brush and the power of AI, I can bring your characters, creatures, items, and scenes to life faster than a wizard can say "prestidigitation!"
-        </p>
-        <p>
-          Whether you need a portrait of a noble paladin, a fearsome dragon, or a mysterious magical artifact, I'm here to help paint your imagination onto the canvas of reality. Well... digital reality, at least! 🖌️✨
+        <p style="text-align: center; font-style: italic;">
+          Tools for tabletop roleplayers, game masters, and worldbuilders.
         </p>
 
-        <h2>📖 How to Use Quickbrush</h2>
+        <hr style="margin: 1.5em 0;">
 
-        <h3>🔑 First Things First: Setting Up Your OpenAI API Key</h3>
-        <p>Quickbrush now uses a <strong>Bring Your Own Key</strong> model - you'll use your own OpenAI API key:</p>
+        <h2>Getting Started</h2>
+        <p>Link your <strong>Patreon</strong> account to unlock premium features and server-side generation:</p>
         <ol>
-          <li>Visit <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a> and create an account</li>
-          <li>Generate an API key from your account dashboard</li>
-          <li>Add credits to your OpenAI account at <a href="https://platform.openai.com/account/billing" target="_blank">OpenAI Billing</a></li>
-          <li>In Foundry VTT, go to <strong>Settings</strong> → <strong>Configure Settings</strong> → <strong>Module Settings</strong></li>
-          <li>Find <strong>Quickbrush</strong> and configure:
-            <ul>
-              <li>Paste your OpenAI API key in the <strong>OpenAI API Key</strong> field</li>
-              <li>Choose your preferred <strong>Image Model</strong> (GPT-Image-1-Mini is default, faster and cheaper)</li>
-            </ul>
-          </li>
-          <li>Click <strong>Save Changes</strong> and you're ready to create!</li>
+          <li>Go to <strong>Settings → Module Settings → Wizzlethorpe Labs</strong></li>
+          <li>Click <strong>Manage Account</strong></li>
+          <li>Click <strong>Link Account</strong> and follow the prompts</li>
         </ol>
+        <p>Free users can use their own OpenAI API key (BYOK mode) for image generation.</p>
 
-        <h3>🎭 Generating Images</h3>
-        <p>Quickbrush integrates seamlessly throughout Foundry VTT! You can generate images from:</p>
+        <hr style="margin: 1.5em 0;">
 
-        <h4>📓 Journal Pages</h4>
-        <p>Open any journal page, click the <strong>⋮</strong> (controls) button, and select one of the Quickbrush options (Character, Scene, Creature, or Item). I'll automatically extract the text from your journal to use as a description!</p>
-
-        <h4>👤 Character Sheets</h4>
-        <p>Open any character or NPC sheet, click the <strong>⋮</strong> button, and select <strong>Quickbrush</strong>. I'll extract their name, race, class, description, and more to create the perfect portrait!</p>
-
-        <h4>🗡️ Item Sheets</h4>
-        <p>Open any item sheet, click the <strong>⋮</strong> button, and select <strong>Quickbrush</strong>. I'll use the item's name, type, rarity, and description to paint it for you!</p>
-
-        <h4>📚 Journal Directory</h4>
-        <p>Click the <strong>🎨 Quickbrush</strong> button in the Journal tab to open the generation dialog from anywhere!</p>
-
-        <h3>🖼️ Generation Options</h3>
+        <h2>Quickbrush - AI Image Generator</h2>
+        <p>Generate character portraits, scenes, creatures, and items with AI.</p>
         <ul>
-          <li><strong>Generation Type:</strong> Choose Character, Scene, Creature, or Item to guide my artistic style</li>
-          <li><strong>Description:</strong> Long-form text describing the subject (e.g., journal entry, character background). May include irrelevant details — I'll focus on the physical description!</li>
-          <li><strong>Context Prompt (Optional):</strong> Specific instructions about what to focus on (e.g., "wearing a red cloak", "in a defensive stance", "at sunset"). <em>This takes priority over the description!</em></li>
-          <li><strong>Quality:</strong>
-            <ul>
-              <li><strong>Low (Standard):</strong> Fast generation, lower cost</li>
-              <li><strong>Medium (Standard):</strong> Balanced quality and cost</li>
-              <li><strong>High (HD):</strong> Best quality, higher cost</li>
-            </ul>
-          </li>
-          <li><strong>Aspect Ratio:</strong> Square (1024x1024), Landscape (1536x1024), or Portrait (1024x1536)</li>
-          <li><strong>Reference Images:</strong> Upload up to 4 reference images to guide the composition, style, and visual elements. Both GPT-Image-1 and GPT-Image-1-Mini support reference images to help create art that matches your vision!</li>
-          <li><strong>Auto-Update:</strong> When generating from a character/item sheet, check this to automatically set the image</li>
+          <li><strong>Journal Pages:</strong> Click <strong>⋮</strong> → Quickbrush options</li>
+          <li><strong>Character/NPC Sheets:</strong> Click <strong>⋮</strong> → Quickbrush</li>
+          <li><strong>Item Sheets:</strong> Click <strong>⋮</strong> → Quickbrush</li>
+          <li><strong>Journal Tab:</strong> Click the <strong>Quickbrush</strong> button</li>
         </ul>
 
-        <h3>📸 Your Gallery</h3>
-        <p>All your generated images are automatically saved to this journal's <strong>Images</strong> page! You can browse your artistic collection, copy images to use elsewhere, or just admire my handiwork. 😊</p>
+        <h2>Bixby's Cocktails</h2>
+        <p>Mix magical cocktails with random effects for your party!</p>
+        <ul>
+          <li><strong>Journal Tab:</strong> Click the <strong>Mix Cocktail</strong> button</li>
+        </ul>
 
-        <h2>⚠️ Important Information</h2>
+        <hr style="margin: 1.5em 0;">
 
-        <h3>🤖 AI-Powered Art</h3>
-        <p>Quickbrush uses OpenAI's GPT-Image models (GPT-Image-1 or GPT-Image-1-Mini) to generate images based on your descriptions. While I do my best to create exactly what you envision, AI-generated art can sometimes be... creative! You might occasionally get unexpected results, unusual anatomy, or mysterious extra fingers. That's just part of the magical chaos! 🎲</p>
+        <h2>Subscription Tiers</h2>
+        <table style="width: 100%; border-collapse: collapse; margin: 1em 0;">
+          <tr style="background: rgba(255,255,255,0.1);">
+            <th style="padding: 0.5em; text-align: left;">Tier</th>
+            <th style="padding: 0.5em; text-align: left;">Quickbrush</th>
+            <th style="padding: 0.5em; text-align: left;">Cocktails</th>
+          </tr>
+          <tr>
+            <td style="padding: 0.5em;"><strong>Free</strong></td>
+            <td style="padding: 0.5em;">Characters (BYOK)</td>
+            <td style="padding: 0.5em;">Samples only</td>
+          </tr>
+          <tr style="background: rgba(255,255,255,0.05);">
+            <td style="padding: 0.5em;"><strong>Apprentice</strong> ($3/mo)</td>
+            <td style="padding: 0.5em;">All types (BYOK)</td>
+            <td style="padding: 0.5em;">Full menu</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.5em;"><strong>Alchemist</strong> ($5/mo)</td>
+            <td style="padding: 0.5em;">Server generation (10/wk)</td>
+            <td style="padding: 0.5em;">Full menu</td>
+          </tr>
+          <tr style="background: rgba(255,255,255,0.05);">
+            <td style="padding: 0.5em;"><strong>Archmage</strong> ($10/mo)</td>
+            <td style="padding: 0.5em;">Server generation (25/wk)</td>
+            <td style="padding: 0.5em;">Full menu</td>
+          </tr>
+        </table>
 
-        <p><strong>Please note:</strong> Generated images are subject to OpenAI's content policies. Keep your prompts family-friendly and in line with the heroic spirit of adventure!</p>
+        <hr style="margin: 1.5em 0;">
 
-        <h3>💰 Pricing & Costs</h3>
-        <p>Since you're using your own OpenAI API key, you'll be billed directly by OpenAI based on their pricing:</p>
-        <p>Check your usage at <a href="https://platform.openai.com/usage" target="_blank">OpenAI Platform Usage</a>!</p>
-
-        <hr style="margin: 2em 0;">
-
-        <p style="text-align: center; font-style: italic;">
-          <strong>Happy adventuring, and may your campaigns be filled with beautiful art!</strong>
-        </p>
         <p style="text-align: center;">
-          — Wispy Quickbrush 🎨✨
-        </p>
-        <p style="text-align: center; font-size: 0.9em; margin-top: 1.5em;">
-          Quickbrush Module v2.0.0
+          <a href="https://wizzlethorpe.com" target="_blank">wizzlethorpe.com</a> |
+          <a href="https://www.patreon.com/wizzlethorpe" target="_blank">Support on Patreon</a>
         </p>
       </div>
     `;
@@ -894,9 +878,9 @@ Hooks.once('init', () => {
 
   // Register settings menu for account management
   game.settings.registerMenu(MODULE_ID, 'accountSettings', {
-    name: game.i18n.localize('QUICKBRUSH.Settings.AccountSettings.Name'),
-    label: game.i18n.localize('QUICKBRUSH.Settings.AccountSettings.Label'),
-    hint: game.i18n.localize('QUICKBRUSH.Settings.AccountSettings.Hint'),
+    name: game.i18n.localize('WIZZLETHORPE.Settings.AccountSettings.Name'),
+    label: game.i18n.localize('WIZZLETHORPE.Settings.AccountSettings.Label'),
+    hint: game.i18n.localize('WIZZLETHORPE.Settings.AccountSettings.Hint'),
     icon: 'fas fa-user-circle',
     type: QuickbrushAccountSettings,
     restricted: true
@@ -919,8 +903,8 @@ Hooks.once('init', () => {
 
   // Server mode toggle (use Wizzlethorpe's API key vs BYOK)
   game.settings.register(MODULE_ID, 'useServerMode', {
-    name: game.i18n.localize('QUICKBRUSH.Settings.UseServerMode.Name'),
-    hint: game.i18n.localize('QUICKBRUSH.Settings.UseServerMode.Hint'),
+    name: game.i18n.localize('WIZZLETHORPE.Settings.UseServerMode.Name'),
+    hint: game.i18n.localize('WIZZLETHORPE.Settings.UseServerMode.Hint'),
     scope: 'world',
     config: true,
     type: Boolean,
@@ -1647,14 +1631,22 @@ class BixbysCocktails {
         cocktail = await this.getRandomCocktail();
       }
 
+      // Look up liquor and ingredient names
+      const liquor = data.liquors?.find(l => l.id === cocktail.liquorId);
+      const ingredient = data.ingredients?.find(i => i.id === cocktail.ingredientId);
+
       // Get random garnish
       const garnish = data.garnishes && data.garnishes.length > 0
         ? data.garnishes[Math.floor(Math.random() * data.garnishes.length)]
         : null;
 
+      // Roll for effect (1d4)
+      const effectRoll = Math.floor(Math.random() * 4) + 1;
+      const effect = cocktail.effects?.[`roll${effectRoll}`];
+
       // Build chat message
       const speaker = ChatMessage.getSpeaker();
-      const content = this.buildChatContent(cocktail, garnish);
+      const content = this.buildChatContent(cocktail, liquor, ingredient, garnish, effect, effectRoll);
 
       await ChatMessage.create({
         speaker,
@@ -1672,19 +1664,17 @@ class BixbysCocktails {
   /**
    * Build chat message content for a cocktail
    */
-  static buildChatContent(cocktail, garnish) {
+  static buildChatContent(cocktail, liquor, ingredient, garnish, effect, effectRoll) {
     const showEffects = game.settings.get(MODULE_ID, 'showCocktailEffects');
     const isGM = game.user.isGM;
 
     let html = `
       <div class="bixbys-cocktail-card">
         <h3 class="cocktail-name">🍸 ${cocktail.name}</h3>
-        <p class="cocktail-liquor"><strong>Base:</strong> ${cocktail.liquor}</p>
+        <p class="cocktail-description"><em>${cocktail.description}</em></p>
+        <p class="cocktail-liquor"><strong>Base:</strong> ${liquor?.name || 'Unknown'}</p>
+        <p class="cocktail-ingredient"><strong>Ingredient:</strong> ${ingredient?.name || 'Unknown'}</p>
     `;
-
-    if (cocktail.ingredients && cocktail.ingredients.length > 0) {
-      html += `<p class="cocktail-ingredients"><strong>Ingredients:</strong> ${cocktail.ingredients.join(', ')}</p>`;
-    }
 
     if (garnish) {
       html += `<p class="cocktail-garnish"><strong>Garnish:</strong> ${garnish.name}</p>`;
@@ -1692,11 +1682,11 @@ class BixbysCocktails {
 
     // Show effects to GM always, to players only if setting allows
     if (isGM || showEffects) {
-      if (cocktail.effect) {
-        html += `<div class="cocktail-effect"><strong>Effect:</strong> ${cocktail.effect}</div>`;
+      if (effect) {
+        html += `<div class="cocktail-effect"><strong>Effect (🎲${effectRoll}):</strong> ${effect}</div>`;
       }
-      if (garnish && garnish.effect) {
-        html += `<div class="garnish-effect"><strong>Garnish Effect:</strong> ${garnish.effect}</div>`;
+      if (garnish?.description) {
+        html += `<div class="garnish-effect"><strong>Garnish Effect:</strong> ${garnish.description}</div>`;
       }
     }
 
@@ -1725,6 +1715,10 @@ class CocktailMenuDialog extends FormApplication {
     super({}, options);
     this.cocktailData = cocktailData;
     this.selectedCocktail = null;
+    this.selectedGarnish = null;
+    this.filterLiquor = '';
+    this.filterIngredient = '';
+    this.filterEnvironment = '';
   }
 
   static get defaultOptions() {
@@ -1732,17 +1726,41 @@ class CocktailMenuDialog extends FormApplication {
       id: 'cocktail-menu-dialog',
       title: game.i18n.localize('COCKTAILS.Dialog.Title'),
       template: 'modules/wizzlethorpe-labs/templates/cocktail-menu.hbs',
-      width: 500,
-      height: 600,
+      width: 700,
+      height: 700,
       classes: ['cocktail-menu-dialog'],
       closeOnSubmit: true,
-      submitOnChange: false
+      submitOnChange: false,
+      resizable: true
     });
   }
 
   getData() {
+    // Create lookup maps
+    const liquorMap = new Map((this.cocktailData.liquors || []).map(l => [l.id, l]));
+    const ingredientMap = new Map((this.cocktailData.ingredients || []).map(i => [i.id, i]));
+
+    // Enrich cocktails with liquor/ingredient names and colors
+    const cocktails = (this.cocktailData.cocktails || []).map(c => {
+      const liquor = liquorMap.get(c.liquorId);
+      const ingredient = ingredientMap.get(c.ingredientId);
+      return {
+        ...c,
+        liquorName: liquor?.name || 'Unknown',
+        ingredientName: ingredient?.name || 'Unknown',
+        color: liquor?.color || '#c9a961'
+      };
+    });
+
+    // Enrich ingredients with joined environments for filtering
+    const ingredients = (this.cocktailData.ingredients || []).map(i => ({
+      ...i,
+      environmentsJoined: i.environments?.join(',') || ''
+    }));
+
     return {
-      cocktails: this.cocktailData.cocktails || [],
+      cocktails,
+      ingredients,
       garnishes: this.cocktailData.garnishes || [],
       liquors: this.cocktailData.liquors || [],
       selectedCocktail: this.selectedCocktail
@@ -1752,12 +1770,65 @@ class CocktailMenuDialog extends FormApplication {
   activateListeners(html) {
     super.activateListeners(html);
 
-    // Cocktail selection
-    html.find('.cocktail-item').on('click', (event) => {
+    // Tab switching
+    html.find('.cocktail-tab').on('click', (event) => {
+      const tab = $(event.currentTarget).data('tab');
+      html.find('.cocktail-tab').removeClass('active');
+      $(event.currentTarget).addClass('active');
+      html.find('.cocktail-tab-pane').removeClass('active');
+      html.find(`.cocktail-tab-pane[data-pane="${tab}"]`).addClass('active');
+    });
+
+    // Cocktail card selection
+    html.find('.cocktail-card').on('click', (event) => {
       const cocktailId = $(event.currentTarget).data('id');
       this.selectedCocktail = cocktailId;
-      html.find('.cocktail-item').removeClass('selected');
+      html.find('.cocktail-card').removeClass('selected');
       $(event.currentTarget).addClass('selected');
+    });
+
+    // Liquor filter
+    html.find('.filter-liquor').on('change', (event) => {
+      this.filterLiquor = $(event.currentTarget).val();
+      this._applyFilters(html);
+    });
+
+    // Ingredient filter
+    html.find('.filter-ingredient').on('change', (event) => {
+      this.filterIngredient = $(event.currentTarget).val();
+      this._applyFilters(html);
+    });
+
+    // Garnish selection
+    html.find('.garnish-btn').on('click', (event) => {
+      const btn = $(event.currentTarget);
+      const garnishId = btn.data('id');
+      const garnish = this.cocktailData.garnishes?.find(g => g.id === garnishId);
+
+      if (this.selectedGarnish?.id === garnishId) {
+        // Deselect
+        this.selectedGarnish = null;
+        btn.removeClass('active');
+        html.find('.garnish-hint').text('Select a garnish to see pairing modifiers.');
+      } else {
+        // Select new garnish
+        html.find('.garnish-btn').removeClass('active');
+        btn.addClass('active');
+        this.selectedGarnish = garnish;
+        if (garnish) {
+          html.find('.garnish-hint').html(`<strong>${garnish.name}:</strong> ${garnish.description}`);
+        }
+      }
+      this._applyGarnishModifiers(html);
+    });
+
+    // Environment filter
+    html.find('.env-btn').on('click', (event) => {
+      const btn = $(event.currentTarget);
+      this.filterEnvironment = btn.data('env') || '';
+      html.find('.env-btn').removeClass('active');
+      btn.addClass('active');
+      this._applyEnvironmentFilter(html);
     });
 
     // Random cocktail button
@@ -1773,6 +1844,54 @@ class CocktailMenuDialog extends FormApplication {
         await BixbysCocktails.mixCocktail(this.selectedCocktail);
       } else {
         ui.notifications.warn('Please select a cocktail first!');
+      }
+    });
+  }
+
+  _applyFilters(html) {
+    html.find('.cocktail-card').each((i, el) => {
+      const $el = $(el);
+      const liquorId = $el.data('liquor');
+      const ingredientId = $el.data('ingredient');
+
+      let show = true;
+      if (this.filterLiquor && liquorId !== this.filterLiquor) show = false;
+      if (this.filterIngredient && ingredientId !== this.filterIngredient) show = false;
+
+      $el.toggle(show);
+    });
+  }
+
+  _applyGarnishModifiers(html) {
+    html.find('.cocktail-card').each((i, el) => {
+      const $el = $(el);
+      const cocktailId = $el.data('id');
+      const $modifier = $el.find('.cocktail-card-modifier');
+
+      if (!this.selectedGarnish) {
+        $modifier.text('').removeClass('good bad');
+        return;
+      }
+
+      if (this.selectedGarnish.goodWith?.includes(cocktailId)) {
+        $modifier.text('+1').addClass('good').removeClass('bad');
+      } else if (this.selectedGarnish.badWith?.includes(cocktailId)) {
+        $modifier.text('-1').addClass('bad').removeClass('good');
+      } else {
+        $modifier.text('').removeClass('good bad');
+      }
+    });
+  }
+
+  _applyEnvironmentFilter(html) {
+    html.find('.ingredient-card').each((i, el) => {
+      const $el = $(el);
+      const envs = ($el.data('environments') || '').split(',');
+
+      if (!this.filterEnvironment || envs.includes(this.filterEnvironment)) {
+        $el.show();
+      } else {
+        $el.hide();
       }
     });
   }
