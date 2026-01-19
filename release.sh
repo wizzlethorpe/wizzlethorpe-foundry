@@ -132,51 +132,47 @@ echo -e "${GREEN}GitHub release created successfully!${NC}"
 echo ""
 
 # Publish to FoundryVTT Package Registry
-echo -e "${YELLOW}Do you want to publish to FoundryVTT Package Registry? (y/n)${NC}"
-read -r PUBLISH_FOUNDRY
+FOUNDRY_TOKEN="${FOUNDRY_RELEASE_TOKEN:-$FOUNDRY_API_TOKEN}"
 
-if [ "$PUBLISH_FOUNDRY" = "y" ] || [ "$PUBLISH_FOUNDRY" = "Y" ]; then
-    # Check for FoundryVTT API token (prefer FOUNDRY_RELEASE_TOKEN from .env)
-    FOUNDRY_TOKEN="${FOUNDRY_RELEASE_TOKEN:-$FOUNDRY_API_TOKEN}"
-    if [ -z "$FOUNDRY_TOKEN" ]; then
-        echo -e "${YELLOW}Enter your FoundryVTT API token (or add FOUNDRY_RELEASE_TOKEN to .env):${NC}"
-        read -rs FOUNDRY_TOKEN
-        echo ""
-    fi
+if [ -z "$FOUNDRY_TOKEN" ]; then
+    echo -e "${YELLOW}Skipping FoundryVTT publish (no FOUNDRY_RELEASE_TOKEN in .env)${NC}"
+    echo "To enable auto-publish, add your token to .env:"
+    echo "  FOUNDRY_RELEASE_TOKEN=fvttp_..."
+    echo "Get your token at: https://foundryvtt.com/packages/wizzlethorpe-labs/edit"
+else
+    echo -e "${YELLOW}Publishing to FoundryVTT Package Registry...${NC}"
 
-    if [ -z "$FOUNDRY_TOKEN" ]; then
-        echo -e "${RED}Error: FoundryVTT API token is required for publishing.${NC}"
-        echo "Get your token at: https://foundryvtt.com/me/api-tokens"
-    else
-        echo -e "${YELLOW}Publishing to FoundryVTT...${NC}"
+    MANIFEST_URL="https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/$TAG/module.json"
 
-        # FoundryVTT Package Release API
-        MANIFEST_URL="https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/download/$TAG/module.json"
-
-        RESPONSE=$(curl -s -X POST \
-            "https://api.foundryvtt.com/_api/packages/release_version/" \
-            -H "Content-Type: application/json" \
-            -H "Authorization: $FOUNDRY_TOKEN" \
-            -d "{
-                \"id\": \"$MODULE_ID\",
-                \"dry-run\": false,
-                \"release\": {
-                    \"version\": \"$NEW_VERSION\",
-                    \"manifest\": \"$MANIFEST_URL\",
-                    \"notes\": \"https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/tag/$TAG\",
-                    \"compatibility\": {
-                        \"minimum\": \"13\",
-                        \"verified\": \"13\"
-                    }
+    RESPONSE=$(curl -s -X POST \
+        "https://foundryvtt.com/_api/packages/release_version/" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: $FOUNDRY_TOKEN" \
+        -d "{
+            \"id\": \"$MODULE_ID\",
+            \"dry-run\": false,
+            \"release\": {
+                \"version\": \"$NEW_VERSION\",
+                \"manifest\": \"$MANIFEST_URL\",
+                \"notes\": \"https://github.com/wizzlethorpe/wizzlethorpe-foundry/releases/tag/$TAG\",
+                \"compatibility\": {
+                    \"minimum\": \"13\",
+                    \"verified\": \"13\"
                 }
-            }")
+            }
+        }")
 
-        if echo "$RESPONSE" | grep -q '"status":\s*"success"'; then
+    if echo "$RESPONSE" | grep -q '"status"'; then
+        STATUS=$(echo "$RESPONSE" | jq -r '.status' 2>/dev/null)
+        if [ "$STATUS" = "success" ]; then
             echo -e "${GREEN}Successfully published to FoundryVTT Package Registry!${NC}"
         else
-            echo -e "${RED}FoundryVTT publish response:${NC}"
+            echo -e "${RED}FoundryVTT publish failed:${NC}"
             echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
         fi
+    else
+        echo -e "${RED}FoundryVTT publish error:${NC}"
+        echo "$RESPONSE" | jq . 2>/dev/null || echo "$RESPONSE"
     fi
 fi
 
