@@ -4,7 +4,19 @@
  */
 
 const MODULE_ID = 'wizzlethorpe-labs';
-const API_BASE_URL = 'https://wizzlethorpe.com';
+const DEFAULT_API_URL = 'https://wizzlethorpe.com';
+
+/**
+ * Get the API base URL from settings (allows localhost for dev)
+ */
+function getApiBaseUrl() {
+  try {
+    const customUrl = game.settings.get(MODULE_ID, 'apiBaseUrl');
+    return customUrl || DEFAULT_API_URL;
+  } catch {
+    return DEFAULT_API_URL;
+  }
+}
 
 /**
  * Load QuickbrushCore library dynamically
@@ -81,7 +93,7 @@ class WizzlethorpeAPI {
   static async startLinking() {
     try {
       // Request a link code from the API
-      const response = await fetch(`${API_BASE_URL}/api/auth/link`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/link`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       });
@@ -97,7 +109,7 @@ class WizzlethorpeAPI {
       }
 
       // Open the link page in a new browser window
-      const linkUrl = `${API_BASE_URL}/link?code=${data.linkCode}&device=Foundry%20VTT`;
+      const linkUrl = `${getApiBaseUrl()}/link?code=${data.linkCode}&device=Foundry%20VTT`;
       window.open(linkUrl, '_blank', 'width=500,height=600');
 
       // Start polling for completion
@@ -117,7 +129,7 @@ class WizzlethorpeAPI {
       await new Promise(resolve => setTimeout(resolve, intervalMs));
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/link-status?code=${linkCode}`);
+        const response = await fetch(`${getApiBaseUrl()}/api/auth/link-status?code=${linkCode}`);
         const data = await response.json();
 
         if (data.status === 'completed' && data.token) {
@@ -163,7 +175,7 @@ class WizzlethorpeAPI {
       throw new Error('No Wizzlethorpe account linked');
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/generate`, {
+    const response = await fetch(`${getApiBaseUrl()}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -682,9 +694,9 @@ class QuickbrushGallery {
         </ul>
 
         <h2>Bixby's Cocktails</h2>
-        <p>Mix magical cocktails with random effects for your party!</p>
+        <p>Import magical cocktails, ingredients, and roll tables for your party!</p>
         <ul>
-          <li><strong>Journal Tab:</strong> Click the <strong>Mix Cocktail</strong> button</li>
+          <li><strong>Journal Tab:</strong> Click the <strong>Import Cocktails</strong> button</li>
         </ul>
 
         <hr style="margin: 1.5em 0;">
@@ -941,6 +953,16 @@ Hooks.once('init', () => {
     config: true,
     type: String,
     default: 'quickbrush-images'
+  });
+
+  // API Base URL (for development)
+  game.settings.register(MODULE_ID, 'apiBaseUrl', {
+    name: 'API Base URL (Dev Only)',
+    hint: 'Leave empty to use https://wizzlethorpe.com (recommended). Only change this for local development.',
+    scope: 'world',
+    config: true,
+    type: String,
+    default: ''
   });
 
   // Register a hidden setting to track if we've shown the About page
@@ -1586,7 +1608,7 @@ class BixbysCocktails {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch(`${API_BASE_URL}/api/cocktails`, { headers });
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails`, { headers });
       if (!response.ok) {
         throw new Error('Failed to load cocktail data');
       }
@@ -1596,326 +1618,655 @@ class BixbysCocktails {
       return this.cocktailData;
     } catch (error) {
       console.error('Wizzlethorpe | Failed to load cocktail data:', error);
-      ui.notifications.error('Failed to load cocktail menu. Check your subscription status.');
+      ui.notifications.error('Failed to load cocktail data. Check your subscription status.');
       throw error;
     }
   }
 
   /**
-   * Get a random cocktail from the menu
+   * Import cocktails as Foundry items
+   * Fetches Foundry-formatted items from the API and creates them in the world
    */
-  static async getRandomCocktail() {
-    const data = await this.loadCocktailData();
-    if (!data.cocktails || data.cocktails.length === 0) {
-      throw new Error('No cocktails available');
+  static async importCocktails() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import cocktails.');
+      return;
     }
 
-    const cocktail = data.cocktails[Math.floor(Math.random() * data.cocktails.length)];
-    return cocktail;
-  }
-
-  /**
-   * Mix a cocktail and post to chat
-   */
-  static async mixCocktail(cocktailId = null) {
     try {
-      const data = await this.loadCocktailData();
+      ui.notifications.info('Fetching cocktails from Wizzlethorpe Labs...');
 
-      let cocktail;
-      if (cocktailId) {
-        cocktail = data.cocktails.find(c => c.id === cocktailId);
-        if (!cocktail) {
-          throw new Error('Cocktail not found');
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=cocktails`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
-      } else {
-        cocktail = await this.getRandomCocktail();
-      }
-
-      // Look up liquor and ingredient names
-      const liquor = data.liquors?.find(l => l.id === cocktail.liquorId);
-      const ingredient = data.ingredients?.find(i => i.id === cocktail.ingredientId);
-
-      // Get random garnish
-      const garnish = data.garnishes && data.garnishes.length > 0
-        ? data.garnishes[Math.floor(Math.random() * data.garnishes.length)]
-        : null;
-
-      // Roll for effect (1d4)
-      const effectRoll = Math.floor(Math.random() * 4) + 1;
-      const effect = cocktail.effects?.[`roll${effectRoll}`];
-
-      // Build chat message
-      const speaker = ChatMessage.getSpeaker();
-      const content = this.buildChatContent(cocktail, liquor, ingredient, garnish, effect, effectRoll);
-
-      await ChatMessage.create({
-        speaker,
-        content,
-        type: CONST.CHAT_MESSAGE_TYPES.OTHER
       });
 
-      ui.notifications.info(`Mixed: ${cocktail.name}!`);
-    } catch (error) {
-      console.error('Wizzlethorpe | Failed to mix cocktail:', error);
-      ui.notifications.error(`Failed to mix cocktail: ${error.message}`);
-    }
-  }
-
-  /**
-   * Build chat message content for a cocktail
-   */
-  static buildChatContent(cocktail, liquor, ingredient, garnish, effect, effectRoll) {
-    const showEffects = game.settings.get(MODULE_ID, 'showCocktailEffects');
-    const isGM = game.user.isGM;
-
-    let html = `
-      <div class="bixbys-cocktail-card">
-        <h3 class="cocktail-name">🍸 ${cocktail.name}</h3>
-        <p class="cocktail-description"><em>${cocktail.description}</em></p>
-        <p class="cocktail-liquor"><strong>Base:</strong> ${liquor?.name || 'Unknown'}</p>
-        <p class="cocktail-ingredient"><strong>Ingredient:</strong> ${ingredient?.name || 'Unknown'}</p>
-    `;
-
-    if (garnish) {
-      html += `<p class="cocktail-garnish"><strong>Garnish:</strong> ${garnish.name}</p>`;
-    }
-
-    // Show effects to GM always, to players only if setting allows
-    if (isGM || showEffects) {
-      if (effect) {
-        html += `<div class="cocktail-effect"><strong>Effect (🎲${effectRoll}):</strong> ${effect}</div>`;
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch cocktails');
       }
-      if (garnish?.description) {
-        html += `<div class="garnish-effect"><strong>Garnish Effect:</strong> ${garnish.description}</div>`;
-      }
-    }
 
-    html += `</div>`;
-    return html;
-  }
+      const data = await response.json();
+      const items = data.cocktails || data.items;
 
-  /**
-   * Open the cocktail menu dialog
-   */
-  static async openMenu() {
-    try {
-      const data = await this.loadCocktailData();
-      new CocktailMenuDialog(data).render(true);
-    } catch (error) {
-      // Error already handled in loadCocktailData
-    }
-  }
-}
-
-/**
- * Cocktail Menu Dialog
- */
-class CocktailMenuDialog extends FormApplication {
-  constructor(cocktailData, options = {}) {
-    super({}, options);
-    this.cocktailData = cocktailData;
-    this.selectedCocktail = null;
-    this.selectedGarnish = null;
-    this.filterLiquor = '';
-    this.filterIngredient = '';
-    this.filterEnvironment = '';
-  }
-
-  static get defaultOptions() {
-    return foundry.utils.mergeObject(super.defaultOptions, {
-      id: 'cocktail-menu-dialog',
-      title: game.i18n.localize('COCKTAILS.Dialog.Title'),
-      template: 'modules/wizzlethorpe-labs/templates/cocktail-menu.hbs',
-      width: 700,
-      height: 700,
-      classes: ['cocktail-menu-dialog'],
-      closeOnSubmit: true,
-      submitOnChange: false,
-      resizable: true
-    });
-  }
-
-  getData() {
-    // Create lookup maps
-    const liquorMap = new Map((this.cocktailData.liquors || []).map(l => [l.id, l]));
-    const ingredientMap = new Map((this.cocktailData.ingredients || []).map(i => [i.id, i]));
-
-    // Enrich cocktails with liquor/ingredient names and colors
-    const cocktails = (this.cocktailData.cocktails || []).map(c => {
-      const liquor = liquorMap.get(c.liquorId);
-      const ingredient = ingredientMap.get(c.ingredientId);
-      return {
-        ...c,
-        liquorName: liquor?.name || 'Unknown',
-        ingredientName: ingredient?.name || 'Unknown',
-        color: liquor?.color || '#c9a961'
-      };
-    });
-
-    // Enrich ingredients with joined environments for filtering
-    const ingredients = (this.cocktailData.ingredients || []).map(i => ({
-      ...i,
-      environmentsJoined: i.environments?.join(',') || ''
-    }));
-
-    return {
-      cocktails,
-      ingredients,
-      garnishes: this.cocktailData.garnishes || [],
-      liquors: this.cocktailData.liquors || [],
-      selectedCocktail: this.selectedCocktail
-    };
-  }
-
-  activateListeners(html) {
-    super.activateListeners(html);
-
-    // Tab switching
-    html.find('.cocktail-tab').on('click', (event) => {
-      const tab = $(event.currentTarget).data('tab');
-      html.find('.cocktail-tab').removeClass('active');
-      $(event.currentTarget).addClass('active');
-      html.find('.cocktail-tab-pane').removeClass('active');
-      html.find(`.cocktail-tab-pane[data-pane="${tab}"]`).addClass('active');
-    });
-
-    // Cocktail card selection
-    html.find('.cocktail-card').on('click', (event) => {
-      const cocktailId = $(event.currentTarget).data('id');
-      this.selectedCocktail = cocktailId;
-      html.find('.cocktail-card').removeClass('selected');
-      $(event.currentTarget).addClass('selected');
-    });
-
-    // Liquor filter
-    html.find('.filter-liquor').on('change', (event) => {
-      this.filterLiquor = $(event.currentTarget).val();
-      this._applyFilters(html);
-    });
-
-    // Ingredient filter
-    html.find('.filter-ingredient').on('change', (event) => {
-      this.filterIngredient = $(event.currentTarget).val();
-      this._applyFilters(html);
-    });
-
-    // Garnish selection
-    html.find('.garnish-btn').on('click', (event) => {
-      const btn = $(event.currentTarget);
-      const garnishId = btn.data('id');
-      const garnish = this.cocktailData.garnishes?.find(g => g.id === garnishId);
-
-      if (this.selectedGarnish?.id === garnishId) {
-        // Deselect
-        this.selectedGarnish = null;
-        btn.removeClass('active');
-        html.find('.garnish-hint').text('Select a garnish to see pairing modifiers.');
-      } else {
-        // Select new garnish
-        html.find('.garnish-btn').removeClass('active');
-        btn.addClass('active');
-        this.selectedGarnish = garnish;
-        if (garnish) {
-          html.find('.garnish-hint').html(`<strong>${garnish.name}:</strong> ${garnish.description}`);
-        }
-      }
-      this._applyGarnishModifiers(html);
-    });
-
-    // Environment filter
-    html.find('.env-btn').on('click', (event) => {
-      const btn = $(event.currentTarget);
-      this.filterEnvironment = btn.data('env') || '';
-      html.find('.env-btn').removeClass('active');
-      btn.addClass('active');
-      this._applyEnvironmentFilter(html);
-    });
-
-    // Random cocktail button
-    html.find('.random-cocktail-btn').on('click', async () => {
-      this.close();
-      await BixbysCocktails.mixCocktail();
-    });
-
-    // Mix selected button
-    html.find('.mix-selected-btn').on('click', async () => {
-      if (this.selectedCocktail) {
-        this.close();
-        await BixbysCocktails.mixCocktail(this.selectedCocktail);
-      } else {
-        ui.notifications.warn('Please select a cocktail first!');
-      }
-    });
-  }
-
-  _applyFilters(html) {
-    html.find('.cocktail-card').each((i, el) => {
-      const $el = $(el);
-      const liquorId = $el.data('liquor');
-      const ingredientId = $el.data('ingredient');
-
-      let show = true;
-      if (this.filterLiquor && liquorId !== this.filterLiquor) show = false;
-      if (this.filterIngredient && ingredientId !== this.filterIngredient) show = false;
-
-      $el.toggle(show);
-    });
-  }
-
-  _applyGarnishModifiers(html) {
-    html.find('.cocktail-card').each((i, el) => {
-      const $el = $(el);
-      const cocktailId = $el.data('id');
-      const $modifier = $el.find('.cocktail-card-modifier');
-
-      if (!this.selectedGarnish) {
-        $modifier.text('').removeClass('good bad');
+      if (!items || items.length === 0) {
+        ui.notifications.warn('No cocktails available to import.');
         return;
       }
 
-      if (this.selectedGarnish.goodWith?.includes(cocktailId)) {
-        $modifier.text('+1').addClass('good').removeClass('bad');
-      } else if (this.selectedGarnish.badWith?.includes(cocktailId)) {
-        $modifier.text('-1').addClass('bad').removeClass('good');
-      } else {
-        $modifier.text('').removeClass('good bad');
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import Cocktails',
+        content: `<p>This will import ${items.length} cocktails as consumable items.</p>
+                  <p>Existing items with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      ui.notifications.info(`Importing ${items.length} cocktails...`);
+
+      // Get or create a folder for cocktails
+      let folder = game.folders.find(f => f.name === 'Bixby\'s Cocktails' && f.type === 'Item');
+      if (!folder) {
+        folder = await Folder.create({
+          name: 'Bixby\'s Cocktails',
+          type: 'Item',
+          color: '#9f5f0f'
+        });
       }
-    });
+
+      // Import items
+      let created = 0;
+      let updated = 0;
+
+      for (const itemData of items) {
+        // Add folder reference
+        itemData.folder = folder.id;
+
+        // Check if item already exists (by ID first, then by name for backwards compatibility)
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === folder.id);
+        }
+
+        if (existing) {
+          // Update existing item
+          await existing.update(itemData);
+          updated++;
+        } else {
+          // Create new item with deterministic ID (keepId preserves our _id)
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      ui.notifications.info(`Cocktails imported! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import cocktails:', error);
+      ui.notifications.error(`Failed to import cocktails: ${error.message}`);
+    }
   }
 
-  _applyEnvironmentFilter(html) {
-    html.find('.ingredient-card').each((i, el) => {
-      const $el = $(el);
-      const envs = ($el.data('environments') || '').split(',');
+  /**
+   * Import ingredients as Foundry loot items
+   * Fetches Foundry-formatted items from the API and creates them in the world
+   */
+  static async importIngredients() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import ingredients.');
+      return;
+    }
 
-      if (!this.filterEnvironment || envs.includes(this.filterEnvironment)) {
-        $el.show();
-      } else {
-        $el.hide();
+    try {
+      ui.notifications.info('Fetching ingredients from Wizzlethorpe Labs...');
+
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=ingredients`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch ingredients');
       }
-    });
+
+      const data = await response.json();
+      const items = data.ingredients;
+
+      if (!items || items.length === 0) {
+        ui.notifications.warn('No ingredients available to import.');
+        return;
+      }
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import Ingredients',
+        content: `<p>This will import ${items.length} alchemical ingredients as loot items.</p>
+                  <p>Existing items with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      ui.notifications.info(`Importing ${items.length} ingredients...`);
+
+      // Get or create a folder for ingredients
+      let folder = game.folders.find(f => f.name === 'Bixby\'s Ingredients' && f.type === 'Item');
+      if (!folder) {
+        folder = await Folder.create({
+          name: 'Bixby\'s Ingredients',
+          type: 'Item',
+          color: '#2d5a4a'
+        });
+      }
+
+      // Import items
+      let created = 0;
+      let updated = 0;
+
+      for (const itemData of items) {
+        // Add folder reference
+        itemData.folder = folder.id;
+
+        // Check if item already exists (by ID first, then by name for backwards compatibility)
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === folder.id);
+        }
+
+        if (existing) {
+          // Update existing item
+          await existing.update(itemData);
+          updated++;
+        } else {
+          // Create new item with deterministic ID (keepId preserves our _id)
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      ui.notifications.info(`Ingredients imported! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import ingredients:', error);
+      ui.notifications.error(`Failed to import ingredients: ${error.message}`);
+    }
   }
 
-  async _updateObject(event, formData) {
-    // No form data to save
+  /**
+   * Import all items (cocktails and ingredients)
+   */
+  static async importAll() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import items.');
+      return;
+    }
+
+    try {
+      ui.notifications.info('Fetching data from Wizzlethorpe Labs...');
+
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch data');
+      }
+
+      const data = await response.json();
+      const cocktails = data.cocktails || [];
+      const ingredients = data.ingredients || [];
+
+      if (cocktails.length === 0 && ingredients.length === 0) {
+        ui.notifications.warn('No items available to import.');
+        return;
+      }
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import All Bixby\'s Items',
+        content: `<p>This will import:</p>
+                  <ul>
+                    <li><strong>${cocktails.length}</strong> cocktails (consumable potions)</li>
+                    <li><strong>${ingredients.length}</strong> ingredients (loot items)</li>
+                  </ul>
+                  <p>Existing items with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      // Create folders
+      let cocktailFolder = game.folders.find(f => f.name === 'Bixby\'s Cocktails' && f.type === 'Item');
+      if (!cocktailFolder) {
+        cocktailFolder = await Folder.create({
+          name: 'Bixby\'s Cocktails',
+          type: 'Item',
+          color: '#9f5f0f'
+        });
+      }
+
+      let ingredientFolder = game.folders.find(f => f.name === 'Bixby\'s Ingredients' && f.type === 'Item');
+      if (!ingredientFolder) {
+        ingredientFolder = await Folder.create({
+          name: 'Bixby\'s Ingredients',
+          type: 'Item',
+          color: '#2d5a4a'
+        });
+      }
+
+      let created = 0;
+      let updated = 0;
+
+      // Import cocktails
+      ui.notifications.info(`Importing ${cocktails.length} cocktails...`);
+      for (const itemData of cocktails) {
+        itemData.folder = cocktailFolder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === cocktailFolder.id);
+        }
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      // Import ingredients
+      ui.notifications.info(`Importing ${ingredients.length} ingredients...`);
+      for (const itemData of ingredients) {
+        itemData.folder = ingredientFolder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === ingredientFolder.id);
+        }
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      ui.notifications.info(`Import complete! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import items:', error);
+      ui.notifications.error(`Failed to import items: ${error.message}`);
+    }
+  }
+
+  /**
+   * Import liquors as Foundry loot items
+   */
+  static async importLiquors() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import liquors.');
+      return;
+    }
+
+    try {
+      ui.notifications.info('Fetching liquors from Wizzlethorpe Labs...');
+
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=liquors`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch liquors');
+      }
+
+      const data = await response.json();
+      const items = data.liquors;
+
+      if (!items || items.length === 0) {
+        ui.notifications.warn('No liquors available to import.');
+        return;
+      }
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import Base Liquors',
+        content: `<p>This will import ${items.length} base liquors as loot items.</p>
+                  <p>Existing items with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      ui.notifications.info(`Importing ${items.length} liquors...`);
+
+      // Get or create a folder for liquors
+      let folder = game.folders.find(f => f.name === 'Bixby\'s Liquors' && f.type === 'Item');
+      if (!folder) {
+        folder = await Folder.create({
+          name: 'Bixby\'s Liquors',
+          type: 'Item',
+          color: '#8b4513'
+        });
+      }
+
+      // Import items
+      let created = 0;
+      let updated = 0;
+
+      for (const itemData of items) {
+        itemData.folder = folder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === folder.id);
+        }
+
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      ui.notifications.info(`Liquors imported! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import liquors:', error);
+      ui.notifications.error(`Failed to import liquors: ${error.message}`);
+    }
+  }
+
+  /**
+   * Import roll tables for cocktail effects
+   */
+  static async importRollTables() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import roll tables.');
+      return;
+    }
+
+    try {
+      ui.notifications.info('Fetching roll tables from Wizzlethorpe Labs...');
+
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=tables`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch roll tables');
+      }
+
+      const data = await response.json();
+      const tables = data.tables || [];
+      const tableResults = data.tableResults || [];
+
+      if (tables.length === 0) {
+        ui.notifications.warn('No roll tables available to import.');
+        return;
+      }
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import Cocktail Roll Tables',
+        content: `<p>This will import ${tables.length} roll tables for cocktail effects.</p>
+                  <p>Each table has a d4 of possible effects when drinking a cocktail.</p>
+                  <p>Existing tables with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      ui.notifications.info(`Importing ${tables.length} roll tables...`);
+
+      // Get or create a folder for roll tables
+      let folder = game.folders.find(f => f.name === 'Bixby\'s Cocktail Effects' && f.type === 'RollTable');
+      if (!folder) {
+        folder = await Folder.create({
+          name: 'Bixby\'s Cocktail Effects',
+          type: 'RollTable',
+          color: '#9f5f0f'
+        });
+      }
+
+      // Build a map of result IDs to result data
+      const resultMap = new Map(tableResults.map(r => [r._id, r]));
+
+      let created = 0;
+      let updated = 0;
+
+      for (const tableData of tables) {
+        // Get the results for this table
+        const results = tableData.results.map(id => resultMap.get(id)).filter(Boolean);
+
+        // Build the table with embedded results
+        const tableWithResults = {
+          ...tableData,
+          results: results,
+          folder: folder.id
+        };
+
+        let existing = game.tables.get(tableData._id);
+        if (!existing) {
+          existing = game.tables.find(t => t.name === tableData.name && t.folder?.id === folder.id);
+        }
+
+        if (existing) {
+          // Delete existing results first
+          const existingResultIds = existing.results.map(r => r.id);
+          if (existingResultIds.length > 0) {
+            await existing.deleteEmbeddedDocuments('TableResult', existingResultIds);
+          }
+          // Update table and create new results
+          await existing.update(tableWithResults);
+          await existing.createEmbeddedDocuments('TableResult', results);
+          updated++;
+        } else {
+          await RollTable.create(tableWithResults, { keepId: true });
+          created++;
+        }
+      }
+
+      ui.notifications.info(`Roll tables imported! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import roll tables:', error);
+      ui.notifications.error(`Failed to import roll tables: ${error.message}`);
+    }
+  }
+
+  /**
+   * Import everything: cocktails, ingredients, liquors, and roll tables
+   */
+  static async importEverything() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to import items.');
+      return;
+    }
+
+    try {
+      ui.notifications.info('Fetching all data from Wizzlethorpe Labs...');
+
+      const response = await fetch(`${getApiBaseUrl()}/api/cocktails/foundry?include=all`, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to fetch data');
+      }
+
+      const data = await response.json();
+      const cocktails = data.cocktails || [];
+      const ingredients = data.ingredients || [];
+      const liquors = data.liquors || [];
+      const tables = data.tables || [];
+      const tableResults = data.tableResults || [];
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import All Bixby\'s Content',
+        content: `<p>This will import:</p>
+                  <ul>
+                    <li><strong>${cocktails.length}</strong> cocktails (consumable potions)</li>
+                    <li><strong>${ingredients.length}</strong> ingredients (loot items)</li>
+                    <li><strong>${liquors.length}</strong> base liquors (loot items)</li>
+                    <li><strong>${tables.length}</strong> roll tables (d4 effects)</li>
+                  </ul>
+                  <p>Existing items with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      // Create folders
+      let cocktailFolder = game.folders.find(f => f.name === 'Bixby\'s Cocktails' && f.type === 'Item');
+      if (!cocktailFolder) {
+        cocktailFolder = await Folder.create({ name: 'Bixby\'s Cocktails', type: 'Item', color: '#9f5f0f' });
+      }
+
+      let ingredientFolder = game.folders.find(f => f.name === 'Bixby\'s Ingredients' && f.type === 'Item');
+      if (!ingredientFolder) {
+        ingredientFolder = await Folder.create({ name: 'Bixby\'s Ingredients', type: 'Item', color: '#2d5a4a' });
+      }
+
+      let liquorFolder = game.folders.find(f => f.name === 'Bixby\'s Liquors' && f.type === 'Item');
+      if (!liquorFolder) {
+        liquorFolder = await Folder.create({ name: 'Bixby\'s Liquors', type: 'Item', color: '#8b4513' });
+      }
+
+      let tableFolder = game.folders.find(f => f.name === 'Bixby\'s Cocktail Effects' && f.type === 'RollTable');
+      if (!tableFolder) {
+        tableFolder = await Folder.create({ name: 'Bixby\'s Cocktail Effects', type: 'RollTable', color: '#9f5f0f' });
+      }
+
+      let created = 0;
+      let updated = 0;
+
+      // Import cocktails
+      ui.notifications.info(`Importing ${cocktails.length} cocktails...`);
+      for (const itemData of cocktails) {
+        itemData.folder = cocktailFolder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === cocktailFolder.id);
+        }
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      // Import ingredients
+      ui.notifications.info(`Importing ${ingredients.length} ingredients...`);
+      for (const itemData of ingredients) {
+        itemData.folder = ingredientFolder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === ingredientFolder.id);
+        }
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      // Import liquors
+      ui.notifications.info(`Importing ${liquors.length} liquors...`);
+      for (const itemData of liquors) {
+        itemData.folder = liquorFolder.id;
+        let existing = game.items.get(itemData._id);
+        if (!existing) {
+          existing = game.items.find(i => i.name === itemData.name && i.folder?.id === liquorFolder.id);
+        }
+        if (existing) {
+          await existing.update(itemData);
+          updated++;
+        } else {
+          await Item.create(itemData, { keepId: true });
+          created++;
+        }
+      }
+
+      // Import roll tables
+      if (tables.length > 0) {
+        ui.notifications.info(`Importing ${tables.length} roll tables...`);
+        const resultMap = new Map(tableResults.map(r => [r._id, r]));
+
+        for (const tableData of tables) {
+          const results = tableData.results.map(id => resultMap.get(id)).filter(Boolean);
+          const tableWithResults = { ...tableData, results, folder: tableFolder.id };
+
+          let existing = game.tables.get(tableData._id);
+          if (!existing) {
+            existing = game.tables.find(t => t.name === tableData.name && t.folder?.id === tableFolder.id);
+          }
+          if (existing) {
+            const existingResultIds = existing.results.map(r => r.id);
+            if (existingResultIds.length > 0) {
+              await existing.deleteEmbeddedDocuments('TableResult', existingResultIds);
+            }
+            await existing.update(tableWithResults);
+            await existing.createEmbeddedDocuments('TableResult', results);
+            updated++;
+          } else {
+            await RollTable.create(tableWithResults, { keepId: true });
+            created++;
+          }
+        }
+      }
+
+      ui.notifications.info(`Import complete! Created: ${created}, Updated: ${updated}`, { permanent: true });
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import all content:', error);
+      ui.notifications.error(`Failed to import: ${error.message}`);
+    }
   }
 }
 
 // Register Cocktails settings and hooks in the init hook
 Hooks.once('init', () => {
-  // Register cocktail-specific settings
-  game.settings.register(MODULE_ID, 'showCocktailEffects', {
-    name: game.i18n.localize('COCKTAILS.Settings.ShowEffects.Name'),
-    hint: game.i18n.localize('COCKTAILS.Settings.ShowEffects.Hint'),
-    scope: 'world',
-    config: true,
-    type: Boolean,
-    default: true
-  });
+  // Cocktails module uses the shared Wizzlethorpe API for authentication
+  // No cocktail-specific settings needed
 });
 
 /**
- * Add Cocktails button to Journal Directory
+ * Add Import Cocktails button to Journal Directory
  */
 Hooks.on('renderJournalDirectory', (app, html) => {
   if (!game.user.isGM) return;
@@ -1929,7 +2280,7 @@ Hooks.on('renderJournalDirectory', (app, html) => {
   `);
 
   cocktailButton.on('click', () => {
-    BixbysCocktails.openMenu();
+    BixbysCocktails.importEverything();
   });
 
   $html.find('.directory-header .header-actions').append(cocktailButton);

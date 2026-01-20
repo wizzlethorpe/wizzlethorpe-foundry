@@ -80,31 +80,11 @@
   },
   "COCKTAILS": {
     "Title": "Bixby's Cocktails",
-    "ButtonLabel": "Mix Cocktail",
-    "Settings": {
-      "ShowEffects": {
-        "Name": "Show Effects to Players",
-        "Hint": "When enabled, players can see cocktail effect descriptions. When disabled, only the GM sees effects."
-      }
-    },
-    "Dialog": {
-      "Title": "Mix a Magical Cocktail",
-      "SelectLiquor": "Select a Liquor",
-      "SelectIngredients": "Select Ingredients",
-      "SelectGarnish": "Select a Garnish",
-      "MixCocktail": "Mix Cocktail",
-      "Cancel": "Cancel"
-    },
+    "ButtonLabel": "Import Cocktails",
     "Notifications": {
-      "NeedSubscription": "Full cocktail menu requires an Apprentice subscription or higher",
-      "Success": "Cocktail mixed successfully!",
-      "Error": "Failed to mix cocktail: {error}"
-    },
-    "Chat": {
-      "CocktailMixed": "{name} mixed a magical cocktail!",
-      "Effect": "Effect",
-      "Ingredients": "Ingredients",
-      "Garnish": "Garnish"
+      "NeedSubscription": "Importing cocktails requires an Apprentice subscription or higher",
+      "Success": "Cocktails imported successfully!",
+      "Error": "Failed to import cocktails: {error}"
     }
   }
 }
