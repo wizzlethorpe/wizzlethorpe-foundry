@@ -534,4 +534,293 @@
   text-decoration: underline;
 }
 
-/* Cocktail menu styles removed - we now import items directly */
+/* ============================================
+   Wizzlethorpe Labs Sidebar Tab
+   ============================================ */
+
+/* Sidebar Tab Icon in the sidebar navigation (V13 uses button elements) */
+#sidebar-tabs button[data-tab="wizzlethorpe"] {
+  color: var(--wiz-gold) !important;
+}
+
+#sidebar-tabs button[data-tab="wizzlethorpe"]:hover,
+#sidebar-tabs button[data-tab="wizzlethorpe"].active {
+  color: var(--wiz-gold-light) !important;
+  text-shadow: 0 0 8px rgba(201, 169, 97, 0.5);
+}
+
+/* Sidebar Container */
+.wizzlethorpe-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0.75rem;
+  height: 100%;
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+  overflow-y: auto;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* Sidebar Header */
+.wizzlethorpe-sidebar .sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.3);
+}
+
+.wizzlethorpe-sidebar .sidebar-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+
+.wizzlethorpe-sidebar .sidebar-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--wiz-gold);
+  font-weight: bold;
+}
+
+/* Account Section */
+.wizzlethorpe-sidebar .account-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.wizzlethorpe-sidebar .account-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--wiz-surface);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.wizzlethorpe-sidebar .account-badge.linked {
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.wizzlethorpe-sidebar .account-badge.not-linked {
+  border: 1px solid rgba(201, 169, 97, 0.2);
+  color: var(--wiz-text-muted);
+}
+
+.wizzlethorpe-sidebar .account-mini-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.wizzlethorpe-sidebar .account-mini-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wizzlethorpe-sidebar .tier-badge {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.wizzlethorpe-sidebar .manage-account-btn {
+  padding: 0.4rem 0.75rem;
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  color: var(--wiz-gold);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.wizzlethorpe-sidebar .manage-account-btn:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+}
+
+/* Sidebar Sections */
+.wizzlethorpe-sidebar .sidebar-section {
+  background: var(--wiz-surface);
+  border-radius: 10px;
+  padding: 1rem;
+  border: 1px solid rgba(201, 169, 97, 0.1);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wizzlethorpe-sidebar .sidebar-section h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.95rem;
+  color: var(--wiz-gold);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.wizzlethorpe-sidebar .section-description {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.8rem;
+  color: var(--wiz-text-muted);
+  line-height: 1.4;
+}
+
+/* Button Groups */
+.wizzlethorpe-sidebar .button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.wizzlethorpe-sidebar .wiz-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.wizzlethorpe-sidebar .wiz-btn.primary {
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
+}
+
+.wizzlethorpe-sidebar .wiz-btn.primary:hover {
+  background: var(--wiz-gold-light);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.4);
+}
+
+.wizzlethorpe-sidebar .wiz-btn.secondary {
+  background: var(--wiz-bg-light);
+  color: var(--wiz-gold);
+  border: 1px solid var(--wiz-gold-dark);
+}
+
+.wizzlethorpe-sidebar .wiz-btn.secondary:hover {
+  background: var(--wiz-bg);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+}
+
+/* Quick Generate Buttons */
+.wizzlethorpe-sidebar .quick-generate {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+.wizzlethorpe-sidebar .quick-label,
+.wizzlethorpe-sidebar .options-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--wiz-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.wizzlethorpe-sidebar .quick-buttons,
+.wizzlethorpe-sidebar .import-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.wizzlethorpe-sidebar .quick-btn,
+.wizzlethorpe-sidebar .import-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: var(--wiz-bg);
+  border: 1px solid var(--wiz-gold-dark);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+  color: var(--wiz-gold);
+}
+
+.wizzlethorpe-sidebar .quick-btn:hover,
+.wizzlethorpe-sidebar .import-btn:hover {
+  background: var(--wiz-bg-light);
+  border-color: var(--wiz-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 6px rgba(201, 169, 97, 0.3);
+}
+
+/* Import Options */
+.wizzlethorpe-sidebar .import-options {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+/* Sidebar Footer */
+.wizzlethorpe-sidebar .sidebar-footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.2);
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+.wizzlethorpe-sidebar .sidebar-footer a {
+  color: var(--wiz-gold);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.wizzlethorpe-sidebar .sidebar-footer a:hover {
+  color: var(--wiz-gold-light);
+  text-decoration: underline;
+}
+
+.wizzlethorpe-sidebar .sidebar-footer .separator {
+  color: var(--wiz-gold-dark);
+  margin: 0 0.5rem;
+}
+
+/* Wizzlethorpe Labs Sidebar Tab Container */
+/* Foundry V13 sidebar tabs are hidden by default and shown with .active class */
+#wizzlethorpe.sidebar-tab {
+  background: var(--wiz-bg);
+  flex-direction: column;
+  overflow: hidden;
+  /* Hidden by default - Foundry controls this with .active */
+  display: none;
+}
+
+/* When active, show the tab as flex column */
+#wizzlethorpe.sidebar-tab.active {
+  display: flex !important;
+}
+
+#wizzlethorpe.sidebar-tab .wizzlethorpe-sidebar {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Hide directory header in Wizzlethorpe tab (we have our own) */
+#wizzlethorpe .directory-header {
+  display: none;
+}

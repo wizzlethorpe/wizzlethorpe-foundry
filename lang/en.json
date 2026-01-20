@@ -1,6 +1,6 @@
 {
   "WIZZLETHORPE": {
-    "Title": "Wizzlethorpe Labs Tools",
+    "Title": "Wizzlethorpe Labs",
     "Settings": {
       "AccountSettings": {
         "Name": "Wizzlethorpe Labs Account",
@@ -11,6 +11,15 @@
         "Name": "Use Server-Side Generation",
         "Hint": "When enabled, use Wizzlethorpe Labs servers for generation (requires Alchemist+ subscription). When disabled, always use your own API key."
       }
+    },
+    "Sidebar": {
+      "ManageAccount": "Manage Account",
+      "QuickbrushDesc": "Generate AI portraits, scenes, creatures, and items for your game.",
+      "GenerateImage": "Generate Image",
+      "OpenGallery": "Open Gallery",
+      "QuickGenerate": "Quick generate:",
+      "CocktailsDesc": "Import magical cocktails, ingredients, and roll tables.",
+      "ImportSpecific": "Import specific:"
     }
   },
   "QUICKBRUSH": {

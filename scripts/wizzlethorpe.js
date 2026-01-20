@@ -852,6 +852,10 @@ class QuickbrushGallery {
   }
 }
 
+// Note: Wizzlethorpe sidebar is implemented via the renderSidebar hook
+// rather than extending SidebarTab, as V13's AbstractSidebarTab class
+// is not easily extensible from modules.
+
 /**
  * Helper to extract text from currently visible journal pages
  */
@@ -1005,6 +1009,220 @@ Hooks.once('ready', async () => {
 });
 
 /**
+ * Add Wizzlethorpe Labs button to the sidebar navigation
+ * Uses a custom approach since V13's AbstractSidebarTab is complex to extend
+ */
+Hooks.on('renderSidebar', (app) => {
+  console.log('Wizzlethorpe | Rendering sidebar');
+
+  // Work directly with the live DOM instead of the html parameter
+  // The html parameter might be detached or a copy
+  const sidebarTabsMenu = document.querySelector('#sidebar-tabs menu.flexcol');
+  if (!sidebarTabsMenu) {
+    console.log('Wizzlethorpe | Sidebar tabs menu not found in DOM');
+    return;
+  }
+
+  // Check if already added
+  if (sidebarTabsMenu.querySelector('[data-tab="wizzlethorpe"]')) {
+    console.log('Wizzlethorpe | Wizzlethorpe tab already exists');
+    return;
+  }
+
+  // Create the tab button element (matching V13 structure)
+  const wizzlethorpeTabLi = document.createElement('li');
+  wizzlethorpeTabLi.innerHTML = `
+    <button type="button" class="ui-control plain icon fa-solid fa-flask" data-action="tab" data-tab="wizzlethorpe" role="tab" aria-pressed="false" data-group="primary" aria-label="Wizzlethorpe Labs" aria-controls="wizzlethorpe" data-tooltip="Wizzlethorpe Labs"></button>
+    <div class="notification-pip"></div>
+  `;
+
+  // Insert before the collapse button (last li)
+  const collapseButton = sidebarTabsMenu.querySelector('li:last-child');
+  collapseButton.parentNode.insertBefore(wizzlethorpeTabLi, collapseButton);
+
+  const wizzlethorpeButton = wizzlethorpeTabLi.querySelector('button');
+
+  // Create container for the Wizzlethorpe tab content
+  // In V13, sidebar tabs are inside #sidebar-content, not #sidebar directly
+  const sidebarContent = document.getElementById('sidebar-content');
+  if (!sidebarContent) {
+    console.log('Wizzlethorpe | Sidebar content container not found');
+    return;
+  }
+
+  let wizzlethorpeContainer = document.getElementById('wizzlethorpe');
+  if (!wizzlethorpeContainer) {
+    wizzlethorpeContainer = document.createElement('section');
+    wizzlethorpeContainer.id = 'wizzlethorpe';
+    wizzlethorpeContainer.className = 'tab sidebar-tab flexcol';
+    wizzlethorpeContainer.setAttribute('data-tab', 'wizzlethorpe');
+    wizzlethorpeContainer.setAttribute('data-group', 'primary');
+    sidebarContent.appendChild(wizzlethorpeContainer);
+  }
+
+  // Convert to jQuery for template rendering and listener attachment
+  const $wizzlethorpeContainer = $(wizzlethorpeContainer);
+
+  // Function to render our tab content
+  async function renderWizzlethorpeContent() {
+    // Get template data
+    const isLinked = WizzlethorpeAPI.isLinked();
+    const account = WizzlethorpeAPI.getLinkedAccount();
+    const tierBadgeClass = account ? getTierBadgeClass(account.tierName) : '';
+
+    const templateData = {
+      isLinked,
+      account,
+      tierBadgeClass,
+      canUseServerGeneration: WizzlethorpeAPI.canUseServerGeneration(),
+      canUseBYOKAdvanced: WizzlethorpeAPI.canUseBYOKAdvanced()
+    };
+
+    // Render the template (use namespaced version for V13 compatibility)
+    const renderFn = foundry.applications?.handlebars?.renderTemplate || renderTemplate;
+    const content = await renderFn(
+      'modules/wizzlethorpe-labs/templates/wizzlethorpe-sidebar.hbs',
+      templateData
+    );
+
+    console.log('Wizzlethorpe | Template rendered, content length:', content.length);
+    console.log('Wizzlethorpe | Container element:', wizzlethorpeContainer);
+    console.log('Wizzlethorpe | Container classes:', wizzlethorpeContainer.className);
+
+    $wizzlethorpeContainer.html(content);
+
+    console.log('Wizzlethorpe | Content added to container, children:', wizzlethorpeContainer.children.length);
+
+    // Activate listeners on the content
+    activateWizzlethorpeSidebarListeners($wizzlethorpeContainer);
+  }
+
+  // Helper function for tier badge class
+  function getTierBadgeClass(tierName) {
+    const classes = {
+      'Free': 'tier-free',
+      'Apprentice': 'tier-apprentice',
+      'Alchemist': 'tier-alchemist',
+      'Archmage': 'tier-archmage'
+    };
+    return classes[tierName] || 'tier-free';
+  }
+
+  // Activate event listeners on sidebar content
+  function activateWizzlethorpeSidebarListeners($container) {
+    // Account management
+    $container.find('[data-action="manageAccount"]').on('click', () => {
+      new QuickbrushAccountSettings().render(true);
+    });
+
+    // Quickbrush actions
+    $container.find('[data-action="quickbrushGenerate"]').on('click', () => {
+      new QuickbrushDialog().render(true);
+    });
+
+    $container.find('[data-action="openGallery"]').on('click', async () => {
+      const journal = await QuickbrushGallery.getOrCreateGalleryJournal();
+      journal.sheet.render(true);
+    });
+
+    // Quick generate buttons
+    $container.find('[data-action="quickGenerate"]').on('click', (event) => {
+      const type = event.currentTarget.dataset.type;
+      new QuickbrushDialog({
+        data: {
+          generation_type: type,
+          aspect_ratio: type === 'scene' ? 'landscape' : 'square'
+        }
+      }).render(true);
+    });
+
+    // Cocktails import
+    $container.find('[data-action="importCocktails"]').on('click', () => {
+      BixbysCocktails.importEverything();
+    });
+
+    // Specific import buttons
+    $container.find('[data-action="importSpecific"]').on('click', (event) => {
+      const type = event.currentTarget.dataset.type;
+      switch(type) {
+        case 'cocktails':
+          BixbysCocktails.importCocktails();
+          break;
+        case 'ingredients':
+          BixbysCocktails.importIngredients();
+          break;
+        case 'liquors':
+          BixbysCocktails.importLiquors();
+          break;
+        case 'tables':
+          BixbysCocktails.importRollTables();
+          break;
+      }
+    });
+  }
+
+  // Use native event listener with capture to intercept before Foundry's handler
+  wizzlethorpeButton.addEventListener('click', async (event) => {
+    console.log('Wizzlethorpe | Tab button clicked');
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+
+    // Deactivate all other tab buttons (V13 uses aria-pressed)
+    sidebarTabsMenu.querySelectorAll('button[data-action="tab"]').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-pressed', 'false');
+    });
+
+    // Hide all sidebar tabs (they're in #sidebar-content)
+    sidebarContent.querySelectorAll('.tab.sidebar-tab').forEach(tab => {
+      tab.classList.remove('active');
+    });
+
+    // Activate our tab
+    wizzlethorpeButton.classList.add('active');
+    wizzlethorpeButton.setAttribute('aria-pressed', 'true');
+    wizzlethorpeContainer.classList.add('active');
+
+    console.log('Wizzlethorpe | Tab activated');
+    console.log('Wizzlethorpe | Button classes:', wizzlethorpeButton.className);
+    console.log('Wizzlethorpe | Container classes:', wizzlethorpeContainer.className);
+    console.log('Wizzlethorpe | Container computed display:', window.getComputedStyle(wizzlethorpeContainer).display);
+
+    // Render content if empty
+    if (wizzlethorpeContainer.children.length === 0) {
+      console.log('Wizzlethorpe | Container empty, rendering content...');
+      await renderWizzlethorpeContent();
+    } else {
+      console.log('Wizzlethorpe | Container already has content:', wizzlethorpeContainer.children.length, 'children');
+    }
+  }, true); // Use capture phase
+
+  // Store a refresh function globally so other code can refresh the sidebar
+  if (!window.WizzlethorpeLabs) window.WizzlethorpeLabs = {};
+  window.WizzlethorpeLabs.refreshSidebar = renderWizzlethorpeContent;
+
+  console.log('Wizzlethorpe | Added Wizzlethorpe Labs tab to sidebar');
+});
+
+/**
+ * When a native sidebar tab is activated, deactivate our custom tab
+ */
+Hooks.on('changeSidebarTab', () => {
+  // When any native sidebar tab is activated, deactivate our custom tab
+  const wizzlethorpeButton = document.querySelector('#sidebar-tabs button[data-tab="wizzlethorpe"]');
+  const wizzlethorpeContainer = document.getElementById('wizzlethorpe');
+
+  if (wizzlethorpeButton) {
+    wizzlethorpeButton.classList.remove('active');
+    wizzlethorpeButton.setAttribute('aria-pressed', 'false');
+  }
+  if (wizzlethorpeContainer) {
+    wizzlethorpeContainer.classList.remove('active');
+  }
+});
+
+/**
  * Add Quickbrush options to journal sheet controls dropdown
  */
 Hooks.on('renderJournalEntrySheet', (app, html) => {
@@ -1081,32 +1299,6 @@ Hooks.on('renderJournalEntrySheet', (app, html) => {
 
     $menu.append(menuItem);
   });
-});
-
-/**
- * Add Quickbrush button to Journal Directory
- * This adds a button in the journal tab (like lava-flow does)
- */
-Hooks.on('renderJournalDirectory', (app, html) => {
-  if (!game.user.isGM) return;
-
-  console.log('Wizzlethorpe | Adding UI button to journal directory');
-
-  // In V13, html might be an HTMLElement, not jQuery, so wrap it
-  const $html = html instanceof jQuery ? html : $(html);
-
-  const button = $(`
-    <button class="quickbrush-directory-btn">
-      <i class="fas fa-palette"></i> ${game.i18n.localize('QUICKBRUSH.ButtonLabel')}
-    </button>
-  `);
-
-  button.on('click', function() {
-    console.log('Wizzlethorpe | Opening generation dialog from directory button');
-    new QuickbrushDialog().render(true);
-  });
-
-  $html.find('.directory-header .header-actions').append(button);
 });
 
 /**
@@ -2259,35 +2451,8 @@ class BixbysCocktails {
   }
 }
 
-// Register Cocktails settings and hooks in the init hook
-Hooks.once('init', () => {
-  // Cocktails module uses the shared Wizzlethorpe API for authentication
-  // No cocktail-specific settings needed
-});
-
-/**
- * Add Import Cocktails button to Journal Directory
- */
-Hooks.on('renderJournalDirectory', (app, html) => {
-  if (!game.user.isGM) return;
-
-  const $html = html instanceof jQuery ? html : $(html);
-
-  const cocktailButton = $(`
-    <button class="cocktails-directory-btn">
-      <i class="fas fa-glass-martini-alt"></i> ${game.i18n.localize('COCKTAILS.ButtonLabel')}
-    </button>
-  `);
-
-  cocktailButton.on('click', () => {
-    BixbysCocktails.importEverything();
-  });
-
-  $html.find('.directory-header .header-actions').append(cocktailButton);
-});
-
-// Export for console access
-window.WizzlethorpeLabs = {
+// Export for console access (refreshSidebar is added dynamically in renderSidebar hook)
+window.WizzlethorpeLabs = foundry.utils.mergeObject(window.WizzlethorpeLabs || {}, {
   Quickbrush: {
     Dialog: QuickbrushDialog,
     Gallery: QuickbrushGallery
@@ -2295,7 +2460,7 @@ window.WizzlethorpeLabs = {
   Cocktails: BixbysCocktails,
   API: WizzlethorpeAPI,
   AccountSettings: QuickbrushAccountSettings
-};
+});
 
 // Backwards compatibility
 window.Quickbrush = {
