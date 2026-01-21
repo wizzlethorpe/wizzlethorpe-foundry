@@ -539,15 +539,7 @@
    ============================================ */
 
 /* Sidebar Tab Icon in the sidebar navigation (V13 uses button elements) */
-#sidebar-tabs button[data-tab="wizzlethorpe"] {
-  color: var(--wiz-gold) !important;
-}
-
-#sidebar-tabs button[data-tab="wizzlethorpe"]:hover,
-#sidebar-tabs button[data-tab="wizzlethorpe"].active {
-  color: var(--wiz-gold-light) !important;
-  text-shadow: 0 0 8px rgba(201, 169, 97, 0.5);
-}
+/* Use default Foundry sidebar icon colors to match other tabs */
 
 /* Sidebar Container */
 .wizzlethorpe-sidebar {
@@ -807,6 +799,10 @@
   overflow: hidden;
   /* Hidden by default - Foundry controls this with .active */
   display: none;
+  /* Ensure proper stacking and interactivity */
+  position: relative;
+  z-index: 1;
+  pointer-events: auto;
 }
 
 /* When active, show the tab as flex column */
@@ -818,6 +814,16 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  /* Ensure content is interactive */
+  position: relative;
+  pointer-events: auto;
+}
+
+/* Ensure all interactive elements are clickable */
+#wizzlethorpe.sidebar-tab button,
+#wizzlethorpe.sidebar-tab a {
+  pointer-events: auto;
+  cursor: pointer;
 }
 
 /* Hide directory header in Wizzlethorpe tab (we have our own) */

@@ -1094,7 +1094,7 @@ Hooks.on('renderSidebar', (app) => {
     console.log('Wizzlethorpe | Content added to container, children:', wizzlethorpeContainer.children.length);
 
     // Activate listeners on the content
-    activateWizzlethorpeSidebarListeners($wizzlethorpeContainer);
+    activateWizzlethorpeSidebarListeners();
   }
 
   // Helper function for tier badge class
@@ -1109,64 +1109,99 @@ Hooks.on('renderSidebar', (app) => {
   }
 
   // Activate event listeners on sidebar content
-  function activateWizzlethorpeSidebarListeners($container) {
-    // Account management
-    $container.find('[data-action="manageAccount"]').on('click', () => {
-      new QuickbrushAccountSettings().render(true);
-    });
+  // Uses event delegation on the container for reliable event handling
+  function activateWizzlethorpeSidebarListeners() {
+    console.log('Wizzlethorpe | Attaching sidebar listeners via delegation');
 
-    // Quickbrush actions
-    $container.find('[data-action="quickbrushGenerate"]').on('click', () => {
-      new QuickbrushDialog().render(true);
-    });
+    // Get fresh reference to container
+    const container = document.getElementById('wizzlethorpe');
+    if (!container) {
+      console.error('Wizzlethorpe | Container not found for listener attachment');
+      return;
+    }
 
-    $container.find('[data-action="openGallery"]').on('click', async () => {
-      const journal = await QuickbrushGallery.getOrCreateGalleryJournal();
-      journal.sheet.render(true);
-    });
+    // Remove any existing delegated listener to prevent duplicates
+    container.removeEventListener('click', handleSidebarClick);
 
-    // Quick generate buttons
-    $container.find('[data-action="quickGenerate"]').on('click', (event) => {
-      const type = event.currentTarget.dataset.type;
-      new QuickbrushDialog({
-        data: {
-          generation_type: type,
-          aspect_ratio: type === 'scene' ? 'landscape' : 'square'
-        }
-      }).render(true);
-    });
+    // Add delegated click handler
+    container.addEventListener('click', handleSidebarClick);
 
-    // Cocktails import
-    $container.find('[data-action="importCocktails"]').on('click', () => {
-      BixbysCocktails.importEverything();
-    });
-
-    // Specific import buttons
-    $container.find('[data-action="importSpecific"]').on('click', (event) => {
-      const type = event.currentTarget.dataset.type;
-      switch(type) {
-        case 'cocktails':
-          BixbysCocktails.importCocktails();
-          break;
-        case 'ingredients':
-          BixbysCocktails.importIngredients();
-          break;
-        case 'liquors':
-          BixbysCocktails.importLiquors();
-          break;
-        case 'tables':
-          BixbysCocktails.importRollTables();
-          break;
-      }
-    });
+    console.log('Wizzlethorpe | Sidebar listeners attached via delegation');
   }
 
-  // Use native event listener with capture to intercept before Foundry's handler
+  // Delegated click handler for all sidebar buttons
+  function handleSidebarClick(event) {
+    const target = event.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.dataset.action;
+    console.log('Wizzlethorpe | Sidebar action clicked:', action);
+
+    switch (action) {
+      case 'manageAccount':
+        new QuickbrushAccountSettings().render(true);
+        break;
+
+      case 'quickbrushGenerate':
+        new QuickbrushDialog().render(true);
+        break;
+
+      case 'openGallery':
+        QuickbrushGallery.getOrCreateGalleryJournal().then(journal => {
+          journal.sheet.render(true);
+        });
+        break;
+
+      case 'quickGenerate': {
+        const type = target.dataset.type;
+        new QuickbrushDialog({
+          data: {
+            generation_type: type,
+            aspect_ratio: type === 'scene' ? 'landscape' : 'square'
+          }
+        }).render(true);
+        break;
+      }
+
+      case 'importCocktails':
+        BixbysCocktails.importEverything();
+        break;
+
+      case 'importSpecific': {
+        const importType = target.dataset.type;
+        switch (importType) {
+          case 'cocktails':
+            BixbysCocktails.importCocktails();
+            break;
+          case 'ingredients':
+            BixbysCocktails.importIngredients();
+            break;
+          case 'liquors':
+            BixbysCocktails.importLiquors();
+            break;
+          case 'tables':
+            BixbysCocktails.importRollTables();
+            break;
+        }
+        break;
+      }
+    }
+  }
+
+  // Handle our custom tab click
+  // We need to prevent Foundry from processing this click AND manually handle everything
   wizzlethorpeButton.addEventListener('click', async (event) => {
     console.log('Wizzlethorpe | Tab button clicked');
+
+    // Stop the event from reaching Foundry's handlers
     event.preventDefault();
     event.stopPropagation();
-    event.stopImmediatePropagation();
+
+    // Expand the sidebar if it's collapsed (use V13 Sidebar API)
+    if (ui.sidebar && !ui.sidebar.expanded) {
+      console.log('Wizzlethorpe | Expanding collapsed sidebar via API');
+      ui.sidebar.expand();
+    }
 
     // Deactivate all other tab buttons (V13 uses aria-pressed)
     sidebarTabsMenu.querySelectorAll('button[data-action="tab"]').forEach(btn => {
@@ -1179,24 +1214,28 @@ Hooks.on('renderSidebar', (app) => {
       tab.classList.remove('active');
     });
 
-    // Activate our tab
+    // Activate our tab button
     wizzlethorpeButton.classList.add('active');
     wizzlethorpeButton.setAttribute('aria-pressed', 'true');
+
+    // Activate our tab container
     wizzlethorpeContainer.classList.add('active');
 
     console.log('Wizzlethorpe | Tab activated');
-    console.log('Wizzlethorpe | Button classes:', wizzlethorpeButton.className);
-    console.log('Wizzlethorpe | Container classes:', wizzlethorpeContainer.className);
-    console.log('Wizzlethorpe | Container computed display:', window.getComputedStyle(wizzlethorpeContainer).display);
 
     // Render content if empty
     if (wizzlethorpeContainer.children.length === 0) {
       console.log('Wizzlethorpe | Container empty, rendering content...');
       await renderWizzlethorpeContent();
-    } else {
-      console.log('Wizzlethorpe | Container already has content:', wizzlethorpeContainer.children.length, 'children');
     }
-  }, true); // Use capture phase
+
+    // ALWAYS attach listeners after activation to ensure they work
+    // Use a small delay to ensure the DOM is fully rendered
+    requestAnimationFrame(() => {
+      console.log('Wizzlethorpe | Attaching listeners after activation');
+      activateWizzlethorpeSidebarListeners();
+    });
+  });
 
   // Store a refresh function globally so other code can refresh the sidebar
   if (!window.WizzlethorpeLabs) window.WizzlethorpeLabs = {};
@@ -2273,8 +2312,9 @@ class BixbysCocktails {
           if (existingResultIds.length > 0) {
             await existing.deleteEmbeddedDocuments('TableResult', existingResultIds);
           }
-          // Update table and create new results
-          await existing.update(tableWithResults);
+          // Update table metadata (without results) then create new results
+          const { results: _, ...tableMetadata } = tableWithResults;
+          await existing.update(tableMetadata);
           await existing.createEmbeddedDocuments('TableResult', results);
           updated++;
         } else {
@@ -2432,7 +2472,9 @@ class BixbysCocktails {
             if (existingResultIds.length > 0) {
               await existing.deleteEmbeddedDocuments('TableResult', existingResultIds);
             }
-            await existing.update(tableWithResults);
+            // Update table metadata (without results) then create new results
+            const { results: _, ...tableMetadata } = tableWithResults;
+            await existing.update(tableMetadata);
             await existing.createEmbeddedDocuments('TableResult', results);
             updated++;
           } else {
