@@ -19,35 +19,6 @@ function getApiBaseUrl() {
 }
 
 /**
- * Load QuickbrushCore library dynamically
- * The core library is bundled from packages/quickbrush-core
- */
-let QuickbrushCore = null;
-
-async function loadQuickbrushCore() {
-  if (QuickbrushCore) {
-    return QuickbrushCore; // Already loaded
-  }
-
-  // Load the bundled core library
-  const coreUrl = 'modules/wizzlethorpe-labs/scripts/quickbrush-core.js';
-  const absoluteUrl = new URL(coreUrl, window.location.origin).href;
-
-  console.log(`Wizzlethorpe | Loading core library from: ${absoluteUrl}`);
-
-  try {
-    const module = await import(absoluteUrl);
-    QuickbrushCore = module.QuickbrushCore || module;
-    console.log('Wizzlethorpe | Quickbrush core library loaded successfully');
-    return QuickbrushCore;
-  } catch (error) {
-    console.error('Wizzlethorpe | Failed to load Quickbrush core library', error);
-    ui.notifications.error('Wizzlethorpe Labs: Failed to load Quickbrush core library. Please check your module installation.');
-    throw error;
-  }
-}
-
-/**
  * Wizzlethorpe Labs API Client
  * Handles account linking and server-side generation
  */
@@ -470,22 +441,21 @@ class QuickbrushDialog extends FormApplication {
     const useServerMode = game.settings.get(MODULE_ID, 'useServerMode');
     const canUseServer = WizzlethorpeAPI.canUseServerGeneration();
 
-    // Decide generation method:
-    // 1. If linked with Alchemist+ and server mode enabled -> use server
-    // 2. If linked with Apprentice+ and has API key -> use BYOK through API (for tier validation)
-    // 3. If has API key -> use local BYOK (legacy)
-    // 4. Otherwise -> error
+    // All generation goes through the Wizzlethorpe API
+    // 1. If linked with Alchemist+ and server mode enabled -> use server generation
+    // 2. If linked and has API key -> use BYOK through API (for tier validation)
+    // 3. Otherwise -> error (must link account)
 
-    const shouldUseAPI = isLinked && (canUseServer && useServerMode);
-    const shouldUseBYOKAPI = isLinked && !shouldUseAPI && openaiApiKey;
-    const shouldUseLocalBYOK = !isLinked && openaiApiKey;
+    if (!isLinked) {
+      ui.notifications.error('Please link your Wizzlethorpe Labs account to use image generation. Go to Settings → Module Settings → Wizzlethorpe Labs → Manage Account.');
+      return;
+    }
 
-    if (!shouldUseAPI && !shouldUseBYOKAPI && !shouldUseLocalBYOK) {
-      if (!isLinked && !openaiApiKey) {
-        ui.notifications.error('Please link your Wizzlethorpe Labs account or configure an OpenAI API key in module settings.');
-      } else if (isLinked && !canUseServer && !openaiApiKey) {
-        ui.notifications.error('Server-side generation requires an Alchemist subscription. Please add an OpenAI API key for BYOK mode.');
-      }
+    const shouldUseServerGeneration = canUseServer && useServerMode;
+    const shouldUseBYOK = !shouldUseServerGeneration && openaiApiKey;
+
+    if (!shouldUseServerGeneration && !shouldUseBYOK) {
+      ui.notifications.error('Server-side generation requires an Alchemist subscription ($5/mo). Alternatively, add your own OpenAI API key in module settings for BYOK mode.');
       return;
     }
 
@@ -506,87 +476,34 @@ class QuickbrushDialog extends FormApplication {
 
       const imageModel = game.settings.get(MODULE_ID, 'imageModel') || 'gpt-image-1-mini';
 
-      if (shouldUseAPI) {
+      // Build generation params
+      const generateParams = {
+        type: formData.generation_type,
+        text: formData.text,
+        prompt: formData.prompt || '',
+        referenceImages: base64ReferenceImages,
+        model: imageModel,
+        quality: formData.quality,
+        aspectRatio: formData.aspect_ratio
+      };
+
+      if (shouldUseServerGeneration) {
         // Use Wizzlethorpe API (server-side generation)
         console.log('Wizzlethorpe | Using Wizzlethorpe API (server mode)');
-        ui.notifications.info('Generating with Wizzlethorpe Labs...', { permanent: false });
-
-        const result = await WizzlethorpeAPI.generate({
-          type: formData.generation_type,
-          text: formData.text,
-          prompt: formData.prompt || '',
-          referenceImages: base64ReferenceImages,
-          model: imageModel,
-          quality: formData.quality,
-          aspectRatio: formData.aspect_ratio
-        });
-
-        base64Image = result.image;
-        refinedDescription = result.description;
-
-        // Show usage info if available
-        if (result.usage) {
-          console.log(`Quickbrush | Usage: ${result.usage.used}/${result.usage.limit} this week`);
-        }
-
-      } else if (shouldUseBYOKAPI) {
+      } else {
         // Use Wizzlethorpe API with user's API key (BYOK mode)
         console.log('Wizzlethorpe | Using Wizzlethorpe API (BYOK mode)');
-        ui.notifications.info('Generating with your API key...', { permanent: false });
+        generateParams.apiKey = openaiApiKey;
+      }
 
-        const result = await WizzlethorpeAPI.generate({
-          type: formData.generation_type,
-          text: formData.text,
-          prompt: formData.prompt || '',
-          referenceImages: base64ReferenceImages,
-          model: imageModel,
-          quality: formData.quality,
-          aspectRatio: formData.aspect_ratio,
-          apiKey: openaiApiKey
-        });
+      const result = await WizzlethorpeAPI.generate(generateParams);
 
-        base64Image = result.image;
-        refinedDescription = result.description;
+      base64Image = result.image;
+      refinedDescription = result.description;
 
-      } else {
-        // Use local BYOK (legacy mode - direct OpenAI calls)
-        console.log('Wizzlethorpe | Using local BYOK mode');
-
-        const core = await loadQuickbrushCore();
-        const client = new core.OpenAIClient(openaiApiKey);
-        const generator = core.createGenerator(formData.generation_type, client);
-
-        // Step 1: Extract/refine description
-        ui.notifications.info('Step 1/2: Refining description...', { permanent: false });
-        const description = await generator.getDescription(
-          formData.text,
-          formData.prompt || null,
-          base64ReferenceImages
-        );
-
-        refinedDescription = description.text;
-        console.log('Wizzlethorpe | Refined description:', refinedDescription);
-
-        // Step 2: Generate image
-        ui.notifications.info('Step 2/2: Generating image...', { permanent: false });
-        const imageBlob = await generator.generateImage({
-          description: refinedDescription,
-          referenceImages: base64ReferenceImages,
-          model: imageModel,
-          quality: formData.quality,
-          aspectRatio: formData.aspect_ratio
-        });
-
-        // Convert blob to base64
-        const reader = new FileReader();
-        base64Image = await new Promise((resolve, reject) => {
-          reader.onloadend = () => {
-            const base64 = reader.result.split(',')[1];
-            resolve(base64);
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(imageBlob);
-        });
+      // Show usage info if available
+      if (result.usage) {
+        console.log(`Quickbrush | Usage: ${result.usage.used}/${result.usage.limit} this week`);
       }
 
       // Convert base64 to blob for saving
