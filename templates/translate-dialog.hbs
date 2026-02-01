@@ -1,0 +1,47 @@
+<form class="translate-form" autocomplete="off">
+  <div class="form-group">
+    <label for="language">Language</label>
+    <select name="language" id="language" class="translate-select">
+      {{#each languages}}
+        <option value="{{this.id}}" {{#if (eq ../selectedLanguage this.id)}}selected{{/if}}>{{this.name}}</option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="text">English Text <span class="required">*</span></label>
+    <textarea name="text" id="text" rows="3" required placeholder="Enter English text to translate..." class="translate-textarea">{{text}}</textarea>
+    <p class="notes">Simple sentences work best. Subject-verb or subject-verb-object patterns.</p>
+  </div>
+
+  <!-- Results Section (hidden until translation) -->
+  <div class="translation-results" style="display: none;">
+    <div class="result-row">
+      <span class="result-label">Translation:</span>
+      <span class="translation-output" id="translationOutput"></span>
+    </div>
+    <div class="result-row back-row">
+      <span class="result-label">Back-translation:</span>
+      <span class="back-translation-output" id="backTranslationOutput"></span>
+    </div>
+  </div>
+
+  <!-- Progress indicator -->
+  <div class="translation-progress" style="display: none;">
+    <i class="fas fa-spinner fa-spin"></i> Translating...
+  </div>
+
+  <footer class="sheet-footer flexrow">
+    <button type="submit" class="dialog-button submit">
+      <i class="fas fa-language"></i> Translate
+    </button>
+    <div class="share-buttons" style="display: none;">
+      <button type="button" class="dialog-button share-translation" title="Share translation only to chat">
+        <i class="fas fa-share"></i> Share
+      </button>
+      <button type="button" class="dialog-button share-with-back" title="Share with back-translation">
+        <i class="fas fa-share-alt"></i> + Back
+      </button>
+    </div>
+  </footer>
+</form>

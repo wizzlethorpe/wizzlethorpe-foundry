@@ -1080,6 +1080,14 @@ Hooks.on('renderSidebar', (app) => {
         break;
       }
 
+      case 'openTranslator':
+        new ConlangTranslateDialog().render(true);
+        break;
+
+      case 'importGrammars':
+        ConlangGrammars.importGrammars();
+        break;
+
       case 'importCocktails':
         BixbysCocktails.importEverything();
         break;
@@ -2410,6 +2418,472 @@ class BixbysCocktails {
   }
 }
 
+/**
+ * Conlang Translator - Fantasy Language Translation
+ */
+class ConlangTranslator {
+  /**
+   * Translate text to a fantasy language
+   * @param {string} text - The English text to translate
+   * @param {string} language - The target language (default: 'elvish')
+   * @returns {Promise<object>} - Translation result
+   */
+  static async translate(text, language = 'elvish') {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      throw new Error(game.i18n.localize('LANGUAGES.Notifications.NeedAccount'));
+    }
+
+    const response = await fetch(`${getApiBaseUrl()}/api/conlang/translate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        text,
+        language,
+        includeBackTranslation: true
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || data.error || 'Translation failed');
+    }
+
+    return data;
+  }
+
+  /**
+   * Get available languages
+   */
+  static async getLanguages() {
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/conlang/translate`);
+      const data = await response.json();
+      return data.success ? data.languages : [];
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to fetch languages:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Create a chat message with the translation
+   * @param {object} result - Translation result
+   * @param {object} options - Options
+   * @param {boolean} options.includeBackTranslation - Whether to include back-translation (default: true)
+   */
+  static async createTranslationMessage(result, options = {}) {
+    const { includeBackTranslation = true } = options;
+
+    // Build content based on options
+    let content = `
+      <div class="wizzlethorpe-translation">
+        <div class="translation-header">
+          <strong>${result.language.name}</strong>
+        </div>
+        <div class="translation-target" style="font-size: 1.1em; font-style: italic; margin: 0.5em 0;">
+          ${result.target}
+        </div>`;
+
+    if (includeBackTranslation) {
+      content += `
+        <div class="translation-back" style="font-size: 0.85em; opacity: 0.7; margin-top: 0.5em;">
+          <em>Back-translation:</em> ${result.backTranslation || '—'}
+        </div>
+        <div class="translation-original" style="font-size: 0.8em; opacity: 0.5;">
+          <em>Original:</em> ${result.source}
+        </div>`;
+    }
+
+    content += `</div>`;
+
+    await ChatMessage.create({
+      content,
+      speaker: ChatMessage.getSpeaker(),
+      flags: {
+        'wizzlethorpe-labs': {
+          type: 'translation',
+          language: result.language.id,
+          source: result.source,
+          target: result.target
+        }
+      }
+    });
+  }
+}
+
+/**
+ * Language Translation Dialog
+ */
+class ConlangTranslateDialog extends FormApplication {
+  constructor(options = {}) {
+    super({}, options);
+    this.languages = [];
+    this.lastResult = null;
+  }
+
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: 'translate-dialog',
+      title: game.i18n.localize('LANGUAGES.Dialog.Title'),
+      template: 'modules/wizzlethorpe-labs/templates/translate-dialog.hbs',
+      width: 420,
+      height: 340,
+      classes: ['translate-dialog'],
+      closeOnSubmit: false,
+      submitOnChange: false,
+      submitOnClose: false,
+      resizable: true
+    });
+  }
+
+  async getData() {
+    // Load languages if not cached
+    if (this.languages.length === 0) {
+      this.languages = await ConlangTranslator.getLanguages();
+    }
+
+    return {
+      languages: this.languages,
+      selectedLanguage: 'elvish',
+      text: ''
+    };
+  }
+
+  activateListeners(html) {
+    super.activateListeners(html);
+
+    // Share translation only (no back-translation) - for players
+    html.find('.share-translation').on('click', async () => {
+      if (this.lastResult) {
+        await ConlangTranslator.createTranslationMessage(this.lastResult, { includeBackTranslation: false });
+        ui.notifications.info('Translation shared to chat!');
+      }
+    });
+
+    // Share with back-translation - for GMs/verification
+    html.find('.share-with-back').on('click', async () => {
+      if (this.lastResult) {
+        await ConlangTranslator.createTranslationMessage(this.lastResult, { includeBackTranslation: true });
+        ui.notifications.info('Translation shared to chat!');
+      }
+    });
+  }
+
+  async _updateObject(event, formData) {
+    event.preventDefault();
+
+    const text = formData.text?.trim();
+    const language = formData.language || 'elvish';
+
+    if (!text) {
+      ui.notifications.warn('Please enter text to translate.');
+      return;
+    }
+
+    const html = this.element;
+    const progressEl = html.find('.translation-progress');
+    const resultsEl = html.find('.translation-results');
+    const shareBtns = html.find('.share-buttons');
+
+    // Show progress
+    progressEl.show();
+    resultsEl.hide();
+    shareBtns.hide();
+
+    try {
+      const result = await ConlangTranslator.translate(text, language);
+      this.lastResult = result;
+
+      // Display results as plain selectable text
+      html.find('#translationOutput').text(result.target);
+      html.find('#backTranslationOutput').text(result.backTranslation || '—');
+
+      progressEl.hide();
+      resultsEl.show();
+      shareBtns.show();
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Translation error:', error);
+      ui.notifications.error(
+        game.i18n.format('LANGUAGES.Notifications.Error', { error: error.message })
+      );
+      progressEl.hide();
+    }
+  }
+}
+
+/**
+ * Conlang Grammar Importer
+ */
+class ConlangGrammars {
+  /**
+   * Get grammar data for a language from the API
+   */
+  static async getGrammar(languageId) {
+    const response = await fetch(`${getApiBaseUrl()}/api/conlang/grammar/${languageId}`);
+    const data = await response.json();
+
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Failed to fetch grammar');
+    }
+
+    return data;
+  }
+
+  /**
+   * Import all language grammars as journal entries
+   */
+  static async importGrammars() {
+    const token = WizzlethorpeAPI.getToken();
+    if (!token) {
+      ui.notifications.error(game.i18n.localize('LANGUAGES.Notifications.NeedAccount'));
+      return;
+    }
+
+    try {
+      ui.notifications.info('Fetching language grammars...');
+
+      // Get list of languages
+      const languages = await ConlangTranslator.getLanguages();
+
+      if (languages.length === 0) {
+        ui.notifications.warn('No languages available to import.');
+        return;
+      }
+
+      // Confirm import
+      const confirmed = await Dialog.confirm({
+        title: 'Import Language Grammars',
+        content: `<p>This will import grammar guides for ${languages.length} fantasy language(s) as journal entries.</p>
+                  <p>Each grammar includes:</p>
+                  <ul>
+                    <li>A prose guide written in-character</li>
+                    <li>Vocabulary lists (nouns, verbs, adjectives)</li>
+                    <li>Sentence pattern examples</li>
+                  </ul>
+                  <p>Existing journals with the same names will be updated.</p>
+                  <p>Continue?</p>`
+      });
+
+      if (!confirmed) return;
+
+      // Get or create folder for grammars
+      let folder = game.folders.find(f => f.name === 'Language Grammars' && f.type === 'JournalEntry');
+      if (!folder) {
+        folder = await Folder.create({
+          name: 'Language Grammars',
+          type: 'JournalEntry',
+          color: '#4a5568'
+        });
+      }
+
+      let created = 0;
+      let updated = 0;
+
+      for (const lang of languages) {
+        ui.notifications.info(`Importing ${lang.name} grammar...`);
+
+        try {
+          const grammar = await this.getGrammar(lang.id);
+
+          // Build journal content
+          const journalName = `${lang.name} Grammar`;
+
+          // Check if journal already exists
+          let journal = game.journal.find(j => j.name === journalName && j.folder?.id === folder.id);
+
+          // Create pages content
+          const pages = [];
+
+          // Main prose guide page
+          if (grammar.proseGuide) {
+            pages.push({
+              name: 'Grammar Guide',
+              type: 'text',
+              text: {
+                content: this.markdownToHtml(grammar.proseGuide),
+                format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML
+              },
+              sort: 0
+            });
+          }
+
+          // Vocabulary page
+          const vocabHtml = this.buildVocabularyHtml(grammar.vocabulary, lang.name);
+          pages.push({
+            name: 'Vocabulary',
+            type: 'text',
+            text: {
+              content: vocabHtml,
+              format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML
+            },
+            sort: 1
+          });
+
+          // Sentence patterns page
+          const patternsHtml = this.buildPatternsHtml(grammar.sentencePatterns, lang.name);
+          pages.push({
+            name: 'Sentence Patterns',
+            type: 'text',
+            text: {
+              content: patternsHtml,
+              format: CONST.JOURNAL_ENTRY_PAGE_FORMATS.HTML
+            },
+            sort: 2
+          });
+
+          if (journal) {
+            // Update existing journal - delete old pages and create new ones
+            const existingPageIds = journal.pages.map(p => p.id);
+            if (existingPageIds.length > 0) {
+              await journal.deleteEmbeddedDocuments('JournalEntryPage', existingPageIds);
+            }
+            await journal.createEmbeddedDocuments('JournalEntryPage', pages);
+            updated++;
+          } else {
+            // Create new journal
+            await JournalEntry.create({
+              name: journalName,
+              folder: folder.id,
+              pages
+            });
+            created++;
+          }
+        } catch (error) {
+          console.error(`Wizzlethorpe | Failed to import ${lang.name} grammar:`, error);
+        }
+      }
+
+      ui.notifications.info(
+        game.i18n.format('LANGUAGES.Notifications.GrammarsImported', { created, updated }),
+        { permanent: true }
+      );
+
+    } catch (error) {
+      console.error('Wizzlethorpe | Failed to import grammars:', error);
+      ui.notifications.error(
+        game.i18n.format('LANGUAGES.Notifications.GrammarsError', { error: error.message })
+      );
+    }
+  }
+
+  /**
+   * Convert basic markdown to HTML
+   */
+  static markdownToHtml(markdown) {
+    if (!markdown) return '';
+
+    return markdown
+      // Headers
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Bold and italic
+      .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      // Code blocks
+      .replace(/```[\s\S]*?```/g, match => {
+        const code = match.slice(3, -3).trim();
+        return `<pre style="background: rgba(0,0,0,0.1); padding: 0.5em; border-radius: 4px; overflow-x: auto;"><code>${code}</code></pre>`;
+      })
+      // Inline code
+      .replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 0.1em 0.3em; border-radius: 2px;">$1</code>')
+      // Tables (basic support)
+      .replace(/\|(.+)\|/g, (match, content) => {
+        const cells = content.split('|').map(c => c.trim());
+        if (cells.every(c => c.match(/^-+$/))) {
+          return ''; // Skip separator rows
+        }
+        const row = cells.map(c => `<td style="padding: 0.3em 0.5em; border: 1px solid rgba(0,0,0,0.2);">${c}</td>`).join('');
+        return `<tr>${row}</tr>`;
+      })
+      // Horizontal rules
+      .replace(/^---$/gm, '<hr>')
+      // Line breaks
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>');
+  }
+
+  /**
+   * Build vocabulary HTML table
+   */
+  static buildVocabularyHtml(vocabulary, langName) {
+    const buildTable = (items, title) => {
+      if (!items || items.length === 0) return '';
+
+      const rows = items.map(item => `
+        <tr>
+          <td style="padding: 0.3em 0.5em; border: 1px solid rgba(0,0,0,0.2);">${item.english}</td>
+          <td style="padding: 0.3em 0.5em; border: 1px solid rgba(0,0,0,0.2); font-style: italic;">${item.target}</td>
+          <td style="padding: 0.3em 0.5em; border: 1px solid rgba(0,0,0,0.2); opacity: 0.7;">${item.notes || ''}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <h3>${title}</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 1em;">
+          <thead>
+            <tr style="background: rgba(0,0,0,0.1);">
+              <th style="padding: 0.3em 0.5em; text-align: left; border: 1px solid rgba(0,0,0,0.2);">English</th>
+              <th style="padding: 0.3em 0.5em; text-align: left; border: 1px solid rgba(0,0,0,0.2);">${langName}</th>
+              <th style="padding: 0.3em 0.5em; text-align: left; border: 1px solid rgba(0,0,0,0.2);">Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    };
+
+    return `
+      <h1>${langName} Vocabulary</h1>
+      <p>A complete vocabulary reference for the ${langName} language.</p>
+      ${buildTable(vocabulary.nouns, 'Nouns')}
+      ${buildTable(vocabulary.verbs, 'Verbs')}
+      ${buildTable(vocabulary.adjectives, 'Adjectives')}
+    `;
+  }
+
+  /**
+   * Build sentence patterns HTML
+   */
+  static buildPatternsHtml(patterns, langName) {
+    if (!patterns || patterns.length === 0) return '<p>No sentence patterns available.</p>';
+
+    const patternHtml = patterns.map(pattern => {
+      const examples = pattern.examples.map(ex => `
+        <li>
+          <strong>${ex.english}</strong><br>
+          <em style="opacity: 0.8;">${ex.target}</em>
+        </li>
+      `).join('');
+
+      return `
+        <div style="margin-bottom: 1.5em; padding: 1em; background: rgba(0,0,0,0.05); border-radius: 4px;">
+          <h3 style="margin-top: 0;">${pattern.name}</h3>
+          <p>${pattern.description}</p>
+          <p><strong>Pattern:</strong> <code style="background: rgba(0,0,0,0.1); padding: 0.1em 0.3em; border-radius: 2px;">${pattern.pattern}</code></p>
+          <h4>Examples:</h4>
+          <ul>${examples}</ul>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <h1>${langName} Sentence Patterns</h1>
+      <p>Common sentence structures and examples for ${langName}.</p>
+      ${patternHtml}
+    `;
+  }
+}
+
 // Export for console access (refreshSidebar is added dynamically in renderSidebar hook)
 window.WizzlethorpeLabs = foundry.utils.mergeObject(window.WizzlethorpeLabs || {}, {
   Quickbrush: {
@@ -2417,6 +2891,11 @@ window.WizzlethorpeLabs = foundry.utils.mergeObject(window.WizzlethorpeLabs || {
     Gallery: QuickbrushGallery
   },
   Cocktails: BixbysCocktails,
+  Languages: {
+    Translator: ConlangTranslator,
+    Dialog: ConlangTranslateDialog,
+    Grammars: ConlangGrammars
+  },
   API: WizzlethorpeAPI,
   AccountSettings: QuickbrushAccountSettings
 });

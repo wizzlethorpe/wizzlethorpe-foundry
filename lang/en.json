@@ -18,6 +18,7 @@
       "GenerateImage": "Generate Image",
       "OpenGallery": "Open Gallery",
       "QuickGenerate": "Quick generate:",
+      "LanguagesDesc": "Translate text into fantasy languages like Elvish and Dwarvish.",
       "CocktailsDesc": "Import magical cocktails, ingredients, and roll tables.",
       "ImportSpecific": "Import specific:"
     }
@@ -94,6 +95,24 @@
       "NeedSubscription": "Importing cocktails requires an Apprentice subscription or higher",
       "Success": "Cocktails imported successfully!",
       "Error": "Failed to import cocktails: {error}"
+    }
+  },
+  "LANGUAGES": {
+    "Title": "Languages",
+    "ButtonLabel": "Translate",
+    "ImportGrammars": "Import Grammars",
+    "Dialog": {
+      "Title": "Translate to Fantasy Language",
+      "Translate": "Translate",
+      "ShareToChat": "Share to Chat"
+    },
+    "Notifications": {
+      "Translating": "Translating...",
+      "Success": "Translation complete!",
+      "Error": "Translation failed: {error}",
+      "NeedAccount": "Please link your Wizzlethorpe Labs account to use translation.",
+      "GrammarsImported": "Language grammars imported! Created: {created}, Updated: {updated}",
+      "GrammarsError": "Failed to import grammars: {error}"
     }
   }
 }

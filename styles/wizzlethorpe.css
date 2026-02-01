@@ -830,3 +830,206 @@
 #wizzlethorpe .directory-header {
   display: none;
 }
+
+/* ============================================
+   Language Translate Dialog
+   ============================================ */
+
+.translate-dialog .window-content {
+  background: var(--wiz-bg);
+  color: var(--wiz-text);
+  padding: 1rem;
+}
+
+.translate-dialog .window-header {
+  background: var(--wiz-surface);
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.translate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.translate-form label {
+  color: var(--wiz-gold);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.translate-form .required {
+  color: var(--wiz-accent);
+}
+
+/* Select dropdown */
+.translate-form .translate-select {
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  color: var(--wiz-text);
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.4;
+  height: auto;
+}
+
+.translate-form .translate-select option {
+  background: var(--wiz-surface);
+  color: var(--wiz-text);
+  padding: 0.5rem;
+}
+
+.translate-form .translate-textarea {
+  background: var(--wiz-surface);
+  border: 1px solid var(--wiz-gold-dark);
+  color: var(--wiz-text);
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.translate-form .translate-select:focus,
+.translate-form .translate-textarea:focus {
+  border-color: var(--wiz-gold);
+  box-shadow: 0 0 4px rgba(201, 169, 97, 0.3);
+  outline: none;
+}
+
+.translate-form .translate-textarea::placeholder {
+  color: var(--wiz-text-muted);
+  opacity: 0.7;
+}
+
+.translate-form .notes {
+  color: var(--wiz-text-muted);
+  font-size: 0.75rem;
+  margin: 0.15rem 0 0 0;
+}
+
+/* Translation Results - Minimalist inline layout */
+.translate-form .translation-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(201, 169, 97, 0.15);
+}
+
+.translate-form .result-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.translate-form .result-label {
+  color: var(--wiz-text-muted);
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.translate-form .translation-output {
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--wiz-gold-light);
+  line-height: 1.4;
+  /* Make text selectable/copyable */
+  user-select: text;
+  cursor: text;
+}
+
+.translate-form .back-row {
+  opacity: 0.7;
+}
+
+.translate-form .back-translation-output {
+  font-size: 0.85rem;
+  color: var(--wiz-text);
+  line-height: 1.3;
+  /* Make text selectable/copyable */
+  user-select: text;
+  cursor: text;
+}
+
+/* Progress Indicator */
+.translate-form .translation-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  color: var(--wiz-gold);
+  font-size: 0.85rem;
+}
+
+/* Footer Buttons */
+.translate-form .sheet-footer {
+  display: flex;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(201, 169, 97, 0.2);
+  margin-top: 0.25rem;
+}
+
+.translate-form .dialog-button {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+}
+
+.translate-form .dialog-button.submit {
+  background: var(--wiz-gold);
+  color: var(--wiz-bg);
+}
+
+.translate-form .dialog-button.submit:hover {
+  background: var(--wiz-gold-light);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(201, 169, 97, 0.4);
+}
+
+/* Share buttons group */
+.translate-form .share-buttons {
+  display: flex;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.translate-form .share-buttons .dialog-button {
+  flex: 1;
+  padding: 0.5rem 0.5rem;
+  font-size: 0.8rem;
+  background: var(--wiz-bg-light);
+  color: var(--wiz-gold);
+  border: 1px solid var(--wiz-gold-dark);
+}
+
+.translate-form .share-buttons .dialog-button:hover {
+  background: var(--wiz-bg);
+  border-color: var(--wiz-gold);
+  color: var(--wiz-gold-light);
+}
+
+.translate-form .dialog-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
