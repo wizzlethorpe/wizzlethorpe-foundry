@@ -1,0 +1,21 @@
+{
+  "id": "wizzlethorpe-labs",
+  "title": "Wizzlethorpe Labs",
+  "description": "Shared utilities for Wizzlethorpe modules.",
+  "version": "5.0.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "socket": true,
+  "esmodules": ["scripts/socket.mjs", "scripts/teleport.mjs"],
+  "authors": [
+    {
+      "name": "Wizzlethorpe Labs",
+      "email": "admin@wizzlethorpe.com",
+      "url": "https://wizzlethorpe.com",
+      "discord": "jrayc28"
+    }
+  ],
+  "url": "https://wizzlethorpe.com"
+}
